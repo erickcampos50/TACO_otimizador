@@ -1,0 +1,7 @@
+code,enabled,min_g,max_g,selection_min_g,cost_per_100g,meal,planner_group
+53,true,0,120,40,,Café da manhã,Cereal
+458,true,0,300,100,,Café da manhã,Laticínio
+182,true,0,200,60,,Café da manhã,Fruta
+410,true,0,250,80,,Almoço,Proteína
+3,true,0,250,70,,Almoço,Cereal
+561,true,0,220,70,,Almoço,Leguminosa

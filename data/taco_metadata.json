@@ -1,0 +1,419 @@
+{
+  "food_count": 597,
+  "nutrient_count": 66,
+  "nutrients": [
+    {
+      "name": "Umidade (%)",
+      "unit": "%",
+      "missing_count": 13,
+      "non_missing_count": 584
+    },
+    {
+      "name": "Energia (kcal)",
+      "unit": "kcal",
+      "missing_count": 6,
+      "non_missing_count": 591
+    },
+    {
+      "name": "Energia (kJ)",
+      "unit": "kJ",
+      "missing_count": 6,
+      "non_missing_count": 591
+    },
+    {
+      "name": "Proteína (g)",
+      "unit": "g",
+      "missing_count": 15,
+      "non_missing_count": 582
+    },
+    {
+      "name": "Lipídeos (g)",
+      "unit": "g",
+      "missing_count": 7,
+      "non_missing_count": 590
+    },
+    {
+      "name": "Colesterol (mg)",
+      "unit": "mg",
+      "missing_count": 331,
+      "non_missing_count": 266
+    },
+    {
+      "name": "Carboidrato (g)",
+      "unit": "g",
+      "missing_count": 15,
+      "non_missing_count": 582
+    },
+    {
+      "name": "Fibra Alimentar (g)",
+      "unit": "g",
+      "missing_count": 235,
+      "non_missing_count": 362
+    },
+    {
+      "name": "Cinzas (g)",
+      "unit": "g",
+      "missing_count": 12,
+      "non_missing_count": 585
+    },
+    {
+      "name": "Cálcio (mg)",
+      "unit": "mg",
+      "missing_count": 16,
+      "non_missing_count": 581
+    },
+    {
+      "name": "Magnésio (mg)",
+      "unit": "mg",
+      "missing_count": 14,
+      "non_missing_count": 583
+    },
+    {
+      "name": "Manganês (mg)",
+      "unit": "mg",
+      "missing_count": 19,
+      "non_missing_count": 578
+    },
+    {
+      "name": "Fósforo (mg)",
+      "unit": "mg",
+      "missing_count": 14,
+      "non_missing_count": 583
+    },
+    {
+      "name": "Ferro (mg)",
+      "unit": "mg",
+      "missing_count": 14,
+      "non_missing_count": 583
+    },
+    {
+      "name": "Sódio (mg)",
+      "unit": "mg",
+      "missing_count": 10,
+      "non_missing_count": 587
+    },
+    {
+      "name": "Potássio (mg)",
+      "unit": "mg",
+      "missing_count": 13,
+      "non_missing_count": 584
+    },
+    {
+      "name": "Cobre (mg)",
+      "unit": "mg",
+      "missing_count": 14,
+      "non_missing_count": 583
+    },
+    {
+      "name": "Zinco (mg)",
+      "unit": "mg",
+      "missing_count": 15,
+      "non_missing_count": 582
+    },
+    {
+      "name": "Retinol (mcg)",
+      "unit": "mcg",
+      "missing_count": 324,
+      "non_missing_count": 273
+    },
+    {
+      "name": "RE (mcg)",
+      "unit": "mcg",
+      "missing_count": 342,
+      "non_missing_count": 255
+    },
+    {
+      "name": "RAE (mcg)",
+      "unit": "mcg",
+      "missing_count": 342,
+      "non_missing_count": 255
+    },
+    {
+      "name": "Tiamina (mg)",
+      "unit": "mg",
+      "missing_count": 25,
+      "non_missing_count": 572
+    },
+    {
+      "name": "Riboflavina (mg)",
+      "unit": "mg",
+      "missing_count": 25,
+      "non_missing_count": 572
+    },
+    {
+      "name": "Piridoxina (mg)",
+      "unit": "mg",
+      "missing_count": 28,
+      "non_missing_count": 569
+    },
+    {
+      "name": "Niacina (mg)",
+      "unit": "mg",
+      "missing_count": 32,
+      "non_missing_count": 565
+    },
+    {
+      "name": "Vitamina C (mg)",
+      "unit": "mg",
+      "missing_count": 228,
+      "non_missing_count": 369
+    },
+    {
+      "name": "AG - Saturados (g)",
+      "unit": "g",
+      "missing_count": 174,
+      "non_missing_count": 423
+    },
+    {
+      "name": "AG - Mono-insaturados (g)",
+      "unit": "g",
+      "missing_count": 174,
+      "non_missing_count": 423
+    },
+    {
+      "name": "AG - Poli-insaturados (g)",
+      "unit": "g",
+      "missing_count": 175,
+      "non_missing_count": 422
+    },
+    {
+      "name": "AG - 12:0 (g)",
+      "unit": "g",
+      "missing_count": 448,
+      "non_missing_count": 149
+    },
+    {
+      "name": "AG - 14:0 (g)",
+      "unit": "g",
+      "missing_count": 250,
+      "non_missing_count": 347
+    },
+    {
+      "name": "AG - 16:0 (g)",
+      "unit": "g",
+      "missing_count": 175,
+      "non_missing_count": 422
+    },
+    {
+      "name": "AG - 18:0 (g)",
+      "unit": "g",
+      "missing_count": 174,
+      "non_missing_count": 423
+    },
+    {
+      "name": "AG - 20:0 (g)",
+      "unit": "g",
+      "missing_count": 233,
+      "non_missing_count": 364
+    },
+    {
+      "name": "AG - 22:0 (g)",
+      "unit": "g",
+      "missing_count": 314,
+      "non_missing_count": 283
+    },
+    {
+      "name": "AG - 24:0 (g)",
+      "unit": "g",
+      "missing_count": 382,
+      "non_missing_count": 215
+    },
+    {
+      "name": "AG - 14:1 (g)",
+      "unit": "g",
+      "missing_count": 532,
+      "non_missing_count": 65
+    },
+    {
+      "name": "AG - 16:1 (g)",
+      "unit": "g",
+      "missing_count": 231,
+      "non_missing_count": 366
+    },
+    {
+      "name": "AG - 18:1 (g)",
+      "unit": "g",
+      "missing_count": 174,
+      "non_missing_count": 423
+    },
+    {
+      "name": "AG - 20:1 (g)",
+      "unit": "g",
+      "missing_count": 279,
+      "non_missing_count": 318
+    },
+    {
+      "name": "AG - 18:2 n-6 (g)",
+      "unit": "g",
+      "missing_count": 175,
+      "non_missing_count": 422
+    },
+    {
+      "name": "AG - 18:3 n-3 (g)",
+      "unit": "g",
+      "missing_count": 206,
+      "non_missing_count": 391
+    },
+    {
+      "name": "AG - 20:4 (g)",
+      "unit": "g",
+      "missing_count": 400,
+      "non_missing_count": 197
+    },
+    {
+      "name": "AG - 20:5 (g)",
+      "unit": "g",
+      "missing_count": 515,
+      "non_missing_count": 82
+    },
+    {
+      "name": "AG - 22:5 (g)",
+      "unit": "g",
+      "missing_count": 521,
+      "non_missing_count": 76
+    },
+    {
+      "name": "AG - 22:6 (g)",
+      "unit": "g",
+      "missing_count": 531,
+      "non_missing_count": 66
+    },
+    {
+      "name": "AG - 18:1t (g)",
+      "unit": "g",
+      "missing_count": 361,
+      "non_missing_count": 236
+    },
+    {
+      "name": "AG - 18:2t (g)",
+      "unit": "g",
+      "missing_count": 421,
+      "non_missing_count": 176
+    },
+    {
+      "name": "AA - Triptofano (g)",
+      "unit": "g",
+      "missing_count": 571,
+      "non_missing_count": 26
+    },
+    {
+      "name": "AA - Treonina (g)",
+      "unit": "g",
+      "missing_count": 571,
+      "non_missing_count": 26
+    },
+    {
+      "name": "AA - Isoleucina (g)",
+      "unit": "g",
+      "missing_count": 571,
+      "non_missing_count": 26
+    },
+    {
+      "name": "AA - Leucina (g)",
+      "unit": "g",
+      "missing_count": 571,
+      "non_missing_count": 26
+    },
+    {
+      "name": "AA - Lisina (g)",
+      "unit": "g",
+      "missing_count": 571,
+      "non_missing_count": 26
+    },
+    {
+      "name": "AA - Metionina (g)",
+      "unit": "g",
+      "missing_count": 571,
+      "non_missing_count": 26
+    },
+    {
+      "name": "AA - Cistina (g)",
+      "unit": "g",
+      "missing_count": 571,
+      "non_missing_count": 26
+    },
+    {
+      "name": "AA - Fenilalanina (g)",
+      "unit": "g",
+      "missing_count": 571,
+      "non_missing_count": 26
+    },
+    {
+      "name": "AA - Tirosina (g)",
+      "unit": "g",
+      "missing_count": 571,
+      "non_missing_count": 26
+    },
+    {
+      "name": "AA - Valina (g)",
+      "unit": "g",
+      "missing_count": 571,
+      "non_missing_count": 26
+    },
+    {
+      "name": "AA - Arginina (g)",
+      "unit": "g",
+      "missing_count": 571,
+      "non_missing_count": 26
+    },
+    {
+      "name": "AA - Histidina (g)",
+      "unit": "g",
+      "missing_count": 571,
+      "non_missing_count": 26
+    },
+    {
+      "name": "AA - Alanina (g)",
+      "unit": "g",
+      "missing_count": 571,
+      "non_missing_count": 26
+    },
+    {
+      "name": "AA - Ácido Aspártico (g)",
+      "unit": "g",
+      "missing_count": 571,
+      "non_missing_count": 26
+    },
+    {
+      "name": "AA - Ácido Glutâmico (g)",
+      "unit": "g",
+      "missing_count": 571,
+      "non_missing_count": 26
+    },
+    {
+      "name": "AA - Glicina (g)",
+      "unit": "g",
+      "missing_count": 571,
+      "non_missing_count": 26
+    },
+    {
+      "name": "AA - Prolina (g)",
+      "unit": "g",
+      "missing_count": 571,
+      "non_missing_count": 26
+    },
+    {
+      "name": "AA - Serina (g)",
+      "unit": "g",
+      "missing_count": 571,
+      "non_missing_count": 26
+    }
+  ],
+  "groups": [
+    "Alimentos preparados",
+    "Bebidas (alcoólicas e não alcoólicas)",
+    "Carnes e derivados",
+    "Cereais e derivados",
+    "Frutas e derivados",
+    "Gorduras e óleos",
+    "Leguminosas e derivados",
+    "Leite e derivados",
+    "Miscelâneas",
+    "Nozes e sementes",
+    "Outros alimentos industrializados",
+    "Ovos e derivados",
+    "Pescados e frutos do mar",
+    "Produtos açucarados",
+    "Verduras, hortaliças e derivados"
+  ]
+}
