@@ -11,9 +11,9 @@
 <style>
 body{background:#f0f7f4;font-family:'Segoe UI',sans-serif;margin:0}
 /* ---- HEADER ---- */
-.app-header{background:linear-gradient(135deg,#16a34a,#0284c7);color:#fff;padding:1rem 1.5rem;display:flex;align-items:center;gap:1rem;box-shadow:0 4px 18px rgba(0,0,0,.18)}
+.app-header{background:linear-gradient(135deg,#16a34a,#0284c7);color:#fff;padding:1rem 1.5rem;display:flex;align-items:center;gap:1rem;box-shadow:0 4px 18px rgba(0,0,0,.18);flex-wrap:wrap}
 .brand{font-size:1.55rem;font-weight:900;letter-spacing:-1px}
-.subtitle{font-size:.78rem;opacity:.82;margin-top:.1rem}
+.subtitle{font-size:.78rem;opacity:.82;margin-top:.1rem;max-width:52rem;line-height:1.35}
 /* ---- TAB NAV ---- */
 .tab-nav{background:#fff;border-bottom:2px solid #e2e8f0;padding:.25rem 1.5rem 0;display:flex;gap:.4rem;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.06)}
 .tb{border:none;background:none;padding:.55rem 1.1rem;font-weight:700;color:#64748b;border-radius:.5rem .5rem 0 0;cursor:pointer;transition:all .18s;border-bottom:3px solid transparent;margin-bottom:-2px;font-size:.9rem}
@@ -50,6 +50,13 @@ body{background:#f0f7f4;font-family:'Segoe UI',sans-serif;margin:0}
 /* ---- COMPARE ---- */
 .cmp-panel{padding:1.5rem}
 .cmp-sels{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:1rem;margin-bottom:1.2rem}
+.chart-shell{display:flex;flex-direction:column;gap:.75rem;min-height:320px}
+.chart-shell .chart-area{position:relative;flex:1;min-height:300px}
+.chart-shell canvas{width:100% !important;height:100% !important}
+.html-legend ul{list-style:none;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:.4rem .9rem}
+.html-legend li{display:flex;align-items:flex-start;gap:.45rem;cursor:pointer;max-width:100%;min-width:0}
+.html-legend .legend-text{white-space:normal;line-height:1.15;word-break:break-word;font-size:.88rem}
+.html-legend .legend-box{width:.75rem;height:.75rem;margin-top:.15rem;flex-shrink:0;border-radius:.15rem;border:1px solid rgba(0,0,0,.14)}
 /* ---- RANKING ---- */
 .rnk-panel{padding:1.5rem}
 /* ---- LOADING ---- */
@@ -69,7 +76,7 @@ body{background:#f0f7f4;font-family:'Segoe UI',sans-serif;margin:0}
 <div id="ls">
   <div class="spin"></div>
   <h1>🥗 Consulta rápida TACO</h1>
-  <p style="opacity:.85">Carregando base de dados TACO…</p>
+  <p style="opacity:.85">Carregando base de dados da TACO…</p>
 </div>
 
 <!-- App -->
@@ -79,7 +86,7 @@ body{background:#f0f7f4;font-family:'Segoe UI',sans-serif;margin:0}
   <div class="app-header">
     <div>
       <div class="brand">🥗 Consulta rápida TACO</div>
-      <div class="subtitle">Tabela Brasileira de Composição de Alimentos · TACO</div>
+      <div class="subtitle">Forma de realizar uma consulta rápida à tabela TACO.</div>
     </div>
     <div class="ms-auto">
       <label class="btn btn-light btn-sm fw-semibold" style="cursor:pointer">
@@ -172,19 +179,24 @@ body{background:#f0f7f4;font-family:'Segoe UI',sans-serif;margin:0}
       <div id="cmp-res" style="display:none">
         <div class="row g-3">
           <div class="col-12 col-lg-5">
-            <div class="card shadow-sm h-100">
-              <div class="card-header fw-bold" style="background:#16a34a;color:#fff"><i class="bi bi-pentagon me-1"></i>Macronutrientes (Radar)</div>
-              <div class="card-body d-flex align-items-center justify-content-center">
-                <canvas id="radar-c" style="max-height:320px"></canvas>
+              <div class="card shadow-sm h-100">
+                <div class="card-header fw-bold" style="background:#16a34a;color:#fff"><i class="bi bi-pentagon me-1"></i>Macronutrientes (Radar)</div>
+              <div class="card-body chart-shell">
+                <div class="html-legend" id="radar-legend"></div>
+                <div class="chart-area">
+                  <canvas id="radar-c"></canvas>
+                </div>
               </div>
             </div>
           </div>
           <div class="col-12 col-lg-7">
             <div class="card shadow-sm h-100">
               <div class="card-header fw-bold" style="background:#0284c7;color:#fff"><i class="bi bi-bar-chart me-1"></i>Comparação por Nutriente</div>
-              <div class="card-body">
+              <div class="card-body chart-shell">
                 <select id="cns" class="form-select mb-3" onchange="ucb()"></select>
-                <canvas id="cbar-c"></canvas>
+                <div class="chart-area">
+                  <canvas id="cbar-c"></canvas>
+                </div>
               </div>
             </div>
           </div>
@@ -215,7 +227,8 @@ body{background:#f0f7f4;font-family:'Segoe UI',sans-serif;margin:0}
             </div>
             <div class="col-12 col-md-3">
               <label class="form-label fw-bold">Grupo alimentar</label>
-              <select id="rg" class="form-select"><option value="">Todos os grupos</option></select>
+              <input id="rg" class="form-control" list="rg-list" placeholder="Digite para buscar..." autocomplete="off">
+              <datalist id="rg-list"></datalist>
             </div>
             <div class="col-6 col-md-2">
               <label class="form-label fw-bold">Top</label>
@@ -266,8 +279,8 @@ body{background:#f0f7f4;font-family:'Segoe UI',sans-serif;margin:0}
 <!-- Upload fallback -->
 <div id="up-panel" style="display:none;min-height:70vh;display:none;flex-direction:column;align-items:center;justify-content:center;gap:1rem;padding:2rem;text-align:center">
   <div style="font-size:4rem">🥗</div>
-  <h2 class="fw-bold">NutriTACO</h2>
-  <p class="text-muted">Não foi possível carregar <code>taco_base.csv</code> automaticamente.<br>Selecione o arquivo manualmente:</p>
+  <h2 class="fw-bold">Consulta rápida TACO</h2>
+  <p class="text-muted">Não foi possível carregar <code>data/taco_base.csv</code> automaticamente.<br>Selecione o arquivo manualmente:</p>
   <label class="btn btn-success btn-lg rounded-pill fw-bold" style="cursor:pointer">
     <i class="bi bi-upload me-2"></i>Selecionar taco_base.csv
     <input type="file" id="fi" accept=".csv" style="display:none">
@@ -293,9 +306,10 @@ body{background:#f0f7f4;font-family:'Segoe UI',sans-serif;margin:0}
 // ==========================================
 // DATA LAYER
 // ==========================================
-let AD=[], cols={}, groups=[], numCols=[];
+let AD=[], cols={}, groups=[], numCols=[], foodChoices=[], foodLookup=new Map(), foodLabelByIndex=new Map(), groupLookup=new Map(), displayColCounts={};
 
 const CMAP={
+  code:   ['codigo taco','codigo','code'],
   name:   ['descricao','descri','alimento','nome_alimento','nome','food'],
   group:  ['categoria','grupo','category','group','cat','tipo'],
   energy: ['energia_kcal','energia(kcal)','kcal','energia','calorias','energy_kcal','energy'],
@@ -325,6 +339,37 @@ function pN(v){
   return isNaN(f)?null:f;
 }
 
+const HIDDEN_DISPLAY_COLS=new Set(['codigo taco','energia (kj)']);
+const DISPLAY_COL_LABELS={
+  'AG - Saturados (g)':'Gorduras Saturadas',
+  'AG - Mono-insaturados (g)':'Gorduras Mono-insaturadas',
+  'AG - Poli-insaturados (g)':'Gorduras Poli-insaturadas',
+  'AG - 12:0 (g)':'Ácido Láurico',
+  'AG - 14:0 (g)':'Ácido Mirístico',
+  'AG - 16:0 (g)':'Ácido Palmítico',
+  'AG - 18:0 (g)':'Ácido Esteárico',
+  'AG - 20:0 (g)':'Ácidos de Cadeia Longa',
+  'AG - 22:0 (g)':'Ácidos de Cadeia Longa',
+  'AG - 24:0 (g)':'Ácidos de Cadeia Longa',
+  'AG - 16:1 (g)':'Ácido Palmitoleico',
+  'AG - 18:1 (g)':'Ômega-9 (Ácido Oléico)',
+  'AG - 18:2 n-6 (g)':'Ômega-6',
+  'AG - 18:3 n-3 (g)':'Ômega-3 (Vegetal)',
+  'AG - 20:4 (g)':'Ácido Araquidônico',
+  'AG - 20:5 (g)':'Ômega-3 (Peixe)',
+  'AG - 22:6 (g)':'Ômega-3 (Cérebro)',
+  'AG - 18:1t (g)':'Gorduras Trans',
+  'AG - 18:2t (g)':'Gorduras Trans',
+  'Retinol (mcg)':'Vitamina A (animal)',
+  'RE (mcg)':'Equivalentes de Vitamina A',
+  'RAE (mcg)':'Equivalentes de Vitamina A',
+  'Tiamina (mg)':'Vitamina B1',
+  'Riboflavina (mg)':'Vitamina B2',
+  'Piridoxina (mg)':'Vitamina B6',
+  'Niacina (mg)':'Vitamina B3',
+  'Vitamina C (mg)':'Vitamina C',
+};
+
 const NF2=new Intl.NumberFormat('pt-BR',{maximumFractionDigits:2});
 
 function fmtNum(v){
@@ -332,15 +377,153 @@ function fmtNum(v){
   return Number.isFinite(num)?NF2.format(num):'—';
 }
 
+function isHiddenDisplayCol(h){
+  return HIDDEN_DISPLAY_COLS.has(n(h));
+}
+
+function displayColBase(h){
+  return DISPLAY_COL_LABELS[h]||h;
+}
+
+function displayColSuffix(h){
+  const raw=String(h||'').trim();
+  if(!raw)return '';
+  if(raw.startsWith('AG - ')){
+    return raw.replace(/^AG - /,'').replace(/\s*\([^)]*\)\s*$/,'').trim();
+  }
+  return raw.replace(/\s*\([^)]*\)\s*$/,'').trim();
+}
+
+function prepareDisplayCols(){
+  displayColCounts={};
+  numCols.forEach(h=>{
+    const base=displayColBase(h);
+    displayColCounts[base]=(displayColCounts[base]||0)+1;
+  });
+}
+
+function displayColName(h,{unique=true}={}){
+  const base=displayColBase(h);
+  if(!unique)return base;
+  if((displayColCounts[base]||0)<=1)return base;
+  const suffix=displayColSuffix(h);
+  return suffix?`${base} (${suffix})`:base;
+}
+
+function preferredSelectCols(){
+  const priority=[cols.energy,cols.protein,cols.carbs,cols.fiber,cols.fat].filter(Boolean);
+  const ordered=[];
+  priority.forEach(c=>{if(numCols.includes(c)&&!ordered.includes(c))ordered.push(c);});
+  numCols.forEach(c=>{if(!ordered.includes(c))ordered.push(c);});
+  return ordered;
+}
+
+function wrapChartLabel(text,maxLen=18){
+  const words=String(text||'').split(/\s+/).filter(Boolean);
+  if(!words.length)return [''];
+  const lines=[];
+  let line='';
+  words.forEach(word=>{
+    if(!line){
+      line=word;
+      return;
+    }
+    if((line+' '+word).length<=maxLen){
+      line+=' '+word;
+    }else{
+      lines.push(line);
+      line=word;
+    }
+  });
+  if(line)lines.push(line);
+  return lines;
+}
+
+function buildAutocompleteModels(){
+  const nameCounts=new Map();
+  AD.forEach(r=>{
+    const name=String(r[cols.name]||'').trim();
+    if(!name)return;
+    nameCounts.set(name,(nameCounts.get(name)||0)+1);
+  });
+  const used=new Set();
+  foodChoices=AD.map((r,index)=>{
+    const name=String(r[cols.name]||'').trim();
+    const group=cols.group?String(r[cols.group]||'').trim():'';
+    const duplicate=(nameCounts.get(name)||0)>1;
+    let label=duplicate?(group?`${name} - ${group}`:name):name;
+    const key=n(label);
+    if(used.has(key))label=`${label} (${index+1})`;
+    used.add(n(label));
+    return{
+      index,
+      label,
+      search:n([label,name,group].filter(Boolean).join(' ')),
+    };
+  });
+  foodChoices.sort((a,b)=>n(a.label).localeCompare(n(b.label)));
+  foodLookup=new Map(foodChoices.map(o=>[n(o.label),o.index]));
+  foodLabelByIndex=new Map(foodChoices.map(o=>[o.index,o.label]));
+  groupLookup=new Map(groups.map(g=>[n(g),g]));
+}
+
+function resolveFoodIndex(raw){
+  const key=n(raw);
+  if(!key)return null;
+  if(foodLookup.has(key))return foodLookup.get(key);
+  const matches=foodChoices.filter(o=>o.search.includes(key));
+  return matches.length===1?matches[0].index:null;
+}
+
+function resolveGroupValue(raw){
+  const key=n(raw);
+  if(!key)return '';
+  if(groupLookup.has(key))return groupLookup.get(key);
+  const matches=groups.filter(g=>n(g).includes(key));
+  return matches.length===1?matches[0]:null;
+}
+
+const htmlLegendPlugin={
+  id:'htmlLegend',
+  afterUpdate(chart,args,options){
+    const container=document.getElementById(options.containerID);
+    if(!container)return;
+    container.innerHTML='';
+    const list=document.createElement('ul');
+    chart.data.datasets.forEach((dataset,i)=>{
+      const meta=chart.getDatasetMeta(i);
+      const item=document.createElement('li');
+      item.onclick=()=>{
+        chart.setDatasetVisibility(i,!chart.isDatasetVisible(i));
+        chart.update();
+      };
+      const box=document.createElement('span');
+      box.className='legend-box';
+      box.style.background=dataset.borderColor||dataset.backgroundColor||'#94a3b8';
+      box.style.opacity=meta.hidden?'.35':'1';
+      const text=document.createElement('span');
+      text.className='legend-text';
+      text.style.textDecoration=meta.hidden?'line-through':'';
+      text.textContent=dataset.label||`Série ${i+1}`;
+      item.appendChild(box);
+      item.appendChild(text);
+      list.appendChild(item);
+    });
+    container.appendChild(list);
+  }
+};
+
 function procData(raw){
   const headers=raw.meta.fields;
   for(let[k,vs] of Object.entries(CMAP)) cols[k]=detCol(headers,vs);
   numCols=headers.filter(h=>{
-    if(h===cols.name||h===cols.group)return false;
+    if(h===cols.name||h===cols.group||isHiddenDisplayCol(h))return false;
     return raw.data.slice(0,30).some(r=>pN(r[h])!==null);
   });
   AD=raw.data.filter(r=>r[cols.name]&&String(r[cols.name]).trim()!=='');
   if(cols.group) groups=[...new Set(AD.map(r=>r[cols.group]).filter(Boolean))].sort();
+  prepareDisplayCols();
+  buildAutocompleteModels();
   buildUI();
 }
 
@@ -349,7 +532,7 @@ function procData(raw){
 // ==========================================
 async function autoLoad(){
   try{
-    const res=await fetch('.\\data\\taco_base.csv'); 
+    const res=await fetch('./data/taco_base.csv');
     if(!res.ok)throw new Error();
     const txt=await res.text();
     Papa.parse(txt,{header:true,skipEmptyLines:true,delimitersToGuess:[',',';','\t','|'],
@@ -398,9 +581,20 @@ function buildStats(){
 }
 
 function buildGroupFilter(){
-  const sel=document.getElementById('gf'),pills=document.getElementById('group-pills'),rg=document.getElementById('rg');
+  const sel=document.getElementById('gf'),pills=document.getElementById('group-pills'),rgList=document.getElementById('rg-list');
+  sel.innerHTML='<option value="">Todos os grupos</option>';
+  pills.innerHTML='';
+  rgList.innerHTML='';
+  document.getElementById('rg').value='';
   groups.forEach(g=>{
-    [sel,rg].forEach(s=>{const o=document.createElement('option');o.value=g;o.textContent=g;s.appendChild(o);});
+    const o=document.createElement('option');
+    o.value=g;
+    o.textContent=g;
+    sel.appendChild(o);
+    const ro=document.createElement('option');
+    ro.value=g;
+    ro.textContent=g;
+    rgList.appendChild(ro);
     const c=gc(g);
     const btn=document.createElement('button');
     btn.style.cssText=`background:${c}1a;color:${c};border:1.5px solid ${c};font-size:.68rem;font-weight:800;border-radius:2rem;padding:.15rem .65rem;cursor:pointer;transition:all .15s`;
@@ -412,20 +606,31 @@ function buildGroupFilter(){
 
 function buildCmpSelects(){
   const c=document.getElementById('cmp-sels');c.innerHTML='';
-  const opts=AD.map((r,i)=>`<option value="${i}">${r[cols.name]}</option>`).join('');
+  const list=document.createElement('datalist');
+  list.id='food-list';
+  list.style.display='none';
+  foodChoices.forEach(o=>{
+    const opt=document.createElement('option');
+    opt.value=o.label;
+    opt.textContent=o.label;
+    list.appendChild(opt);
+  });
+  c.appendChild(list);
   for(let i=0;i<4;i++){
     const d=document.createElement('div');
     d.innerHTML=`<label class="form-label fw-bold text-muted" style="font-size:.8rem">Alimento ${i+1} ${i<2?'<span class="text-danger">*</span>':'(opcional)'}</label>
-    <select class="form-select" id="cs${i}"><option value="">— Selecionar —</option>${opts}</select>`;
+    <input type="text" class="form-control" id="cs${i}" list="food-list" placeholder="Digite para buscar..." autocomplete="off">`;
     c.appendChild(d);
   }
   const cn=document.getElementById('cns');
-  numCols.forEach(col=>{const o=document.createElement('option');o.value=col;o.textContent=col;cn.appendChild(o);});
+  preferredSelectCols().forEach(col=>{const o=document.createElement('option');o.value=col;o.textContent=displayColName(col);cn.appendChild(o);});
+  if(cols.energy)cn.value=cols.energy;
 }
 
 function buildRankControls(){
   const s=document.getElementById('rn');
-  numCols.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;s.appendChild(o);});
+  s.innerHTML='';
+  preferredSelectCols().forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=displayColName(c);s.appendChild(o);});
   if(cols.energy)s.value=cols.energy;
 }
 
@@ -482,7 +687,7 @@ function renderCards(){
 function renderTable(){
   const kc=[cols.name,cols.group,cols.energy,cols.protein,cols.carbs,cols.fat,cols.fiber,cols.sodium].filter(Boolean);
   const sl=fltData.slice(0,(curPage+1)*PS);
-  document.getElementById('th').innerHTML=`<tr>${kc.map(c=>`<th>${c}</th>`).join('')}</tr>`;
+  document.getElementById('th').innerHTML=`<tr>${kc.map(c=>`<th>${displayColName(c)}</th>`).join('')}</tr>`;
   document.getElementById('tb2').innerHTML=sl.map(r=>{
     const idx=AD.indexOf(r);
     return`<tr onclick="sd(${idx})" style="cursor:pointer">${kc.map(c=>{
@@ -536,7 +741,7 @@ function sd(idx){
         const pct=maxV[x.c]>0?Math.min(100,(x.v/maxV[x.c])*100):0;
         return`<div class="col-12 col-sm-6">
           <div class="nut-row">
-            <span style="min-width:130px;font-size:.75rem;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${x.c}">${x.c}</span>
+            <span style="min-width:130px;max-width:220px;font-size:.75rem;color:#475569;white-space:normal;word-break:break-word;line-height:1.15" title="${displayColName(x.c)}">${displayColName(x.c)}</span>
             <div style="flex:1;height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden">
               <div style="width:${pct}%;height:100%;background:linear-gradient(90deg,#16a34a,#0284c7);border-radius:3px"></div>
             </div>
@@ -555,27 +760,59 @@ function sd(idx){
 let rchart,cbchart;
 const COLORS=['#16a34a','#0284c7','#f59e0b','#ef4444'];
 
-function doCompare(){
+function getCompareFoodIndexes(){
   const idxs=[];
-  for(let i=0;i<4;i++){const v=document.getElementById(`cs${i}`).value;if(v!=='')idxs.push(+v);}
+  for(let i=0;i<4;i++){
+    const raw=String(document.getElementById(`cs${i}`).value||'').trim();
+    if(!raw)continue;
+    const idx=resolveFoodIndex(raw);
+    if(idx===null){
+      alert(`Selecione um alimento válido no campo ${i+1}.`);
+      return null;
+    }
+    idxs.push(idx);
+  }
+  return idxs;
+}
+
+function doCompare(){
+  const idxs=getCompareFoodIndexes();
+  if(!idxs)return;
   if(idxs.length<2){alert('Selecione pelo menos 2 alimentos!');return;}
   const foods=idxs.map(i=>AD[i]);
+  const labels=idxs.map(i=>foodLabelByIndex.get(i)||AD[i][cols.name]);
   const rk=[cols.energy,cols.protein,cols.carbs,cols.fat,cols.fiber].filter(Boolean);
-  const mx={};rk.forEach(k=>{mx[k]=Math.max(...AD.map(r=>pN(r[k])||0));});
+  // Normaliza cada eixo usando apenas os alimentos selecionados, para preencher melhor o radar.
+  const mx={};rk.forEach(k=>{mx[k]=Math.max(...foods.map(r=>pN(r[k])||0));});
   const ds=foods.map((f,i)=>({
-    label:f[cols.name].substring(0,22),
+    label:labels[i],
     data:rk.map(k=>mx[k]>0?((pN(f[k])||0)/mx[k])*100:0),
     borderColor:COLORS[i],backgroundColor:COLORS[i]+'33',borderWidth:2,pointRadius:4
   }));
   if(rchart)rchart.destroy();
-  rchart=new Chart(document.getElementById('radar-c'),{type:'radar',data:{labels:rk,datasets:ds},options:{scales:{r:{beginAtZero:true,max:100,ticks:{display:false}}},plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${fmtNum(ctx.parsed.r)}%`}}}}});
+  rchart=new Chart(document.getElementById('radar-c'),{
+    type:'radar',
+    data:{labels:rk,datasets:ds},
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      scales:{r:{beginAtZero:true,max:100,ticks:{display:false}}},
+      plugins:{
+        legend:{display:false},
+        htmlLegend:{containerID:'radar-legend'},
+        tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${fmtNum(ctx.parsed.r)}%`}}
+      }
+    },
+    plugins:[htmlLegendPlugin]
+  });
   // Table
   const t=document.getElementById('cmp-tbl');
-  t.innerHTML=`<thead class="table-light"><tr><th>Nutriente</th>${foods.map(f=>`<th>${f[cols.name]}</th>`).join('')}</tr></thead>
+  t.innerHTML=`<thead class="table-light"><tr><th>Nutriente</th>${labels.map(label=>`<th style="white-space:normal;min-width:140px">${label}</th>`).join('')}</tr></thead>
   <tbody>${numCols.map(c=>{
     const vs=foods.map(f=>pN(f[c]));
-    const mx2=Math.max(...vs.filter(v=>v!==null));
-    return`<tr><td class="text-muted" style="font-size:.78rem">${c}</td>${vs.map(v=>`<td ${v===mx2&&mx2>0?'class="fw-bold text-success"':''}>${fmtNum(v)}</td>`).join('')}</tr>`;
+    const defined=vs.filter(v=>v!==null);
+    const mx2=defined.length?Math.max(...defined):null;
+    return`<tr><td class="text-muted" style="font-size:.78rem">${displayColName(c)}</td>${vs.map(v=>`<td ${(mx2!==null&&v===mx2&&mx2>0)?'class="fw-bold text-success"':''}>${fmtNum(v)}</td>`).join('')}</tr>`;
   }).join('')}</tbody>`;
   document.getElementById('cmp-res').style.display='block';
   ucb();
@@ -583,35 +820,57 @@ function doCompare(){
 
 function ucb(){
   const col=document.getElementById('cns').value;
-  const idxs=[];for(let i=0;i<4;i++){const v=document.getElementById(`cs${i}`).value;if(v!=='')idxs.push(+v);}
+  const idxs=getCompareFoodIndexes();
+  if(!idxs)return;
   if(!col||idxs.length<2)return;
   const foods=idxs.map(i=>AD[i]);
+  const labels=idxs.map(i=>wrapChartLabel(foodLabelByIndex.get(i)||AD[i][cols.name],18));
   if(cbchart)cbchart.destroy();
-  cbchart=new Chart(document.getElementById('cbar-c'),{type:'bar',
-    data:{labels:foods.map(f=>f[cols.name].substring(0,22)),
-      datasets:[{label:col,data:foods.map(f=>pN(f[col])||0),backgroundColor:COLORS.slice(0,foods.length),borderRadius:6}]},
-    options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${col}: ${fmtNum(ctx.parsed.y)}`}}},scales:{y:{beginAtZero:true,ticks:{callback:v=>fmtNum(v)}}}}});
+  cbchart=new Chart(document.getElementById('cbar-c'),{
+    type:'bar',
+    data:{labels, datasets:[{label:displayColName(col),data:foods.map(f=>pN(f[col])||0),backgroundColor:COLORS.slice(0,foods.length),borderRadius:6}]},
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${displayColName(col)}: ${fmtNum(ctx.parsed.y)}`}}},
+      scales:{y:{beginAtZero:true,ticks:{callback:v=>fmtNum(v)}}}
+    }
+  });
 }
 
 // ==========================================
 // RANKING
 // ==========================================
 let rkChart;
+
+function getSelectedGroupFilter(){
+  const raw=String(document.getElementById('rg').value||'').trim();
+  if(!raw)return '';
+  const grp=resolveGroupValue(raw);
+  if(grp===null){
+    alert('Selecione um grupo válido.');
+    return null;
+  }
+  return grp;
+}
+
 function doRank(){
-  const col=document.getElementById('rn').value,grp=document.getElementById('rg').value;
+  const col=document.getElementById('rn').value;
   const top=+document.getElementById('rt').value,ord=document.getElementById('ro').value;
   if(!col)return;
-  let d=AD.filter(r=>pN(r[col])!==null&&(!grp||r[cols.group]===grp));
+  const grpValue=getSelectedGroupFilter();
+  if(grpValue===null)return;
+  let d=AD.filter(r=>pN(r[col])!==null&&(!grpValue||r[cols.group]===grpValue));
   d.sort((a,b)=>ord==='desc'?(pN(b[col])||0)-(pN(a[col])||0):(pN(a[col])||0)-(pN(b[col])||0));
   d=d.slice(0,top);
   const gcs=d.map(r=>gc(r[cols.group]||''));
   if(rkChart)rkChart.destroy();
   rkChart=new Chart(document.getElementById('rnk-c'),{type:'bar',
-    data:{labels:d.map(r=>r[cols.name].length>30?r[cols.name].substring(0,30)+'…':r[cols.name]),
-      datasets:[{label:col,data:d.map(r=>pN(r[col])),backgroundColor:gcs.map(c=>c+'cc'),borderColor:gcs,borderWidth:1.5,borderRadius:5}]},
-    options:{indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${col}: ${fmtNum(ctx.parsed.x)}`}}},scales:{x:{beginAtZero:true,ticks:{callback:v=>fmtNum(v)}}}}});
+    data:{labels:d.map(r=>wrapChartLabel(foodLabelByIndex.get(AD.indexOf(r))||r[cols.name],28)),
+      datasets:[{label:displayColName(col),data:d.map(r=>pN(r[col])),backgroundColor:gcs.map(c=>c+'cc'),borderColor:gcs,borderWidth:1.5,borderRadius:5}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${displayColName(col)}: ${fmtNum(ctx.parsed.x)}`}}},scales:{x:{beginAtZero:true,ticks:{callback:v=>fmtNum(v)}}}}});
   const medals=['🥇','🥈','🥉'];
-  document.getElementById('rnk-tbl').innerHTML=`<thead class="table-light"><tr><th>#</th><th>Alimento</th>${cols.group?'<th>Grupo</th>':''}<th>${col}</th></tr></thead>
+  document.getElementById('rnk-tbl').innerHTML=`<thead class="table-light"><tr><th>#</th><th>Alimento</th>${cols.group?'<th>Grupo</th>':''}<th>${displayColName(col)}</th></tr></thead>
   <tbody>${d.map((r,i)=>{
     const gc2=gc(r[cols.group]||'');
     return`<tr><td class="fw-bold">${medals[i]||(i+1)}</td><td style="font-size:.82rem">${r[cols.name]}</td>
