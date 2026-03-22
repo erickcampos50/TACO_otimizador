@@ -782,11 +782,14 @@ function doCompare(){
   const foods=idxs.map(i=>AD[i]);
   const labels=idxs.map(i=>foodLabelByIndex.get(i)||AD[i][cols.name]);
   const rk=[cols.energy,cols.protein,cols.carbs,cols.fat,cols.fiber].filter(Boolean);
-  // Normaliza cada eixo usando apenas os alimentos selecionados, para preencher melhor o radar.
-  const mx={};rk.forEach(k=>{mx[k]=Math.max(...foods.map(r=>pN(r[k])||0));});
+  // Normaliza cada eixo de forma independente, para que o maior valor de cada parâmetro vire 100% no próprio eixo.
+  const axisMax={};
+  rk.forEach(k=>{
+    axisMax[k]=Math.max(1,...foods.map(r=>pN(r[k])||0));
+  });
   const ds=foods.map((f,i)=>({
     label:labels[i],
-    data:rk.map(k=>mx[k]>0?((pN(f[k])||0)/mx[k])*100:0),
+    data:rk.map(k=>((pN(f[k])||0)/axisMax[k])*100),
     borderColor:COLORS[i],backgroundColor:COLORS[i]+'33',borderWidth:2,pointRadius:4
   }));
   if(rchart)rchart.destroy();
