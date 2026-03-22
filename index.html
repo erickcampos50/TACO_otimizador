@@ -23,7 +23,13 @@ body{background:#f0f7f4;font-family:'Segoe UI',sans-serif;margin:0}
 .stats-bar{display:flex;gap:.75rem;padding:.75rem 1.5rem;background:#fff;border-bottom:1px solid #e2e8f0;flex-wrap:wrap}
 .s-chip{display:flex;align-items:center;gap:.4rem;border-radius:2rem;padding:.25rem .85rem;font-size:.8rem;font-weight:700}
 /* ---- SEARCH ---- */
-.search-wrap{padding:.85rem 1.5rem;background:#fff;border-bottom:1px solid #e2e8f0}
+.search-wrap{padding:.85rem 1.5rem;background:#fff;border-bottom:1px solid #e2e8f0;position:relative}
+.si-suggest{display:none;margin-top:.55rem}
+.si-suggest-list{display:grid;gap:.35rem;max-height:16rem;overflow:auto}
+.si-suggest-item{width:100%;border:1px solid #dbe4ee;background:#fff;border-radius:.85rem;padding:.6rem .75rem;text-align:left;box-shadow:0 1px 3px rgba(15,23,42,.05);transition:background .15s,border-color .15s,transform .15s;touch-action:manipulation}
+.si-suggest-item:hover,.si-suggest-item:active{background:#f8fafc;border-color:#b6c7da}
+.si-suggest-item strong{display:block;font-size:.9rem;line-height:1.25;color:#0f172a;word-break:break-word}
+.si-suggest-item small{display:block;font-size:.72rem;line-height:1.2;color:#64748b;word-break:break-word}
 /* ---- PILLS ---- */
 #group-pills{padding:.5rem 1.5rem .4rem;background:#fff;border-bottom:1px solid #e2e8f0;display:flex;gap:.35rem;flex-wrap:wrap}
 /* ---- SECTION HDR ---- */
@@ -113,7 +119,7 @@ body{background:#f0f7f4;font-family:'Segoe UI',sans-serif;margin:0}
         <div class="col-12 col-md-5">
           <div class="input-group">
             <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-success"></i></span>
-            <input type="text" id="si" class="form-control border-start-0" placeholder="Buscar alimento…" oninput="os()">
+            <input type="search" id="si" class="form-control border-start-0" placeholder="Buscar alimento…" oninput="os();renderSearchAutocomplete()" onfocus="renderSearchAutocomplete()" onblur="setTimeout(hideSearchAutocomplete,120)" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="search" inputmode="search">
           </div>
         </div>
         <div class="col-6 col-md-3">
@@ -138,6 +144,7 @@ body{background:#f0f7f4;font-family:'Segoe UI',sans-serif;margin:0}
         </div>
       </div>
     </div>
+    <div id="si-suggest" class="si-suggest" aria-label="Sugestões de busca"></div>
     <div id="group-pills"></div>
     <div class="sec-hdr">
       <span id="rc" class="text-muted fw-semibold"></span>
@@ -254,13 +261,7 @@ body{background:#f0f7f4;font-family:'Segoe UI',sans-serif;margin:0}
         </div>
       </div>
       <div class="row g-3">
-        <div class="col-12 col-lg-7">
-          <div class="card shadow-sm">
-            <div class="card-header fw-bold" style="background:#f59e0b"><i class="bi bi-bar-chart-horizontal me-1"></i>Ranking Visual</div>
-            <div class="card-body"><canvas id="rnk-c" style="max-height:420px"></canvas></div>
-          </div>
-        </div>
-        <div class="col-12 col-lg-5">
+        <div class="col-12">
           <div class="card shadow-sm h-100">
             <div class="card-header fw-bold"><i class="bi bi-list-ol me-1"></i>Top Alimentos</div>
             <div class="card-body p-0">
@@ -306,7 +307,7 @@ body{background:#f0f7f4;font-family:'Segoe UI',sans-serif;margin:0}
 // ==========================================
 // DATA LAYER
 // ==========================================
-let AD=[], cols={}, groups=[], numCols=[], foodChoices=[], foodLookup=new Map(), foodLabelByIndex=new Map(), groupLookup=new Map(), displayColCounts={};
+let AD=[], cols={}, groups=[], numCols=[], foodChoices=[], foodLookup=new Map(), foodLabelByIndex=new Map(), foodSearchByIndex=new Map(), groupLookup=new Map(), displayColCounts={};
 
 const CMAP={
   code:   ['codigo taco','codigo','code'],
@@ -464,6 +465,7 @@ function buildAutocompleteModels(){
   foodChoices.sort((a,b)=>n(a.label).localeCompare(n(b.label)));
   foodLookup=new Map(foodChoices.map(o=>[n(o.label),o.index]));
   foodLabelByIndex=new Map(foodChoices.map(o=>[o.index,o.label]));
+  foodSearchByIndex=new Map(foodChoices.map(o=>[o.index,o.search]));
   groupLookup=new Map(groups.map(g=>[n(g),g]));
 }
 
@@ -566,8 +568,70 @@ function gc(g){
 // BUILD UI
 // ==========================================
 function buildUI(){
-  buildStats();buildGroupFilter();buildCmpSelects();buildRankControls();
+  buildStats();buildSearchAutocomplete();buildGroupFilter();buildCmpSelects();buildRankControls();
   fltData=[...AD];curPage=0;renderCards();
+}
+
+function buildSearchAutocomplete(){
+  hideSearchAutocomplete();
+  if(buildSearchAutocomplete._bound)return;
+  buildSearchAutocomplete._bound=true;
+  document.addEventListener('click',e=>{
+    const wrap=document.querySelector('.search-wrap');
+    if(wrap&&!wrap.contains(e.target))hideSearchAutocomplete();
+  });
+}
+
+function renderSearchAutocomplete(){
+  const input=document.getElementById('si');
+  const box=document.getElementById('si-suggest');
+  if(!input||!box)return;
+  const q=n(input.value);
+  if(!q){
+    hideSearchAutocomplete();
+    return;
+  }
+  const matches=foodChoices.filter(o=>o.search.includes(q)).slice(0,8);
+  if(!matches.length){
+    box.innerHTML='<div class="text-muted small px-1">Nenhum alimento encontrado.</div>';
+    box.style.display='block';
+    return;
+  }
+  const list=document.createElement('div');
+  list.className='si-suggest-list';
+  matches.forEach(o=>{
+    const btn=document.createElement('button');
+    btn.type='button';
+    btn.className='si-suggest-item';
+    btn.addEventListener('pointerdown',ev=>{
+      ev.preventDefault();
+      chooseSearchAutocomplete(o.label);
+    });
+    const title=document.createElement('strong');
+    title.textContent=o.label;
+    const sub=document.createElement('small');
+    sub.textContent='Toque para filtrar';
+    btn.appendChild(title);
+    btn.appendChild(sub);
+    list.appendChild(btn);
+  });
+  box.replaceChildren(list);
+  box.style.display='block';
+}
+
+function hideSearchAutocomplete(){
+  const box=document.getElementById('si-suggest');
+  if(!box)return;
+  box.innerHTML='';
+  box.style.display='none';
+}
+
+function chooseSearchAutocomplete(value){
+  const input=document.getElementById('si');
+  if(!input)return;
+  input.value=value;
+  hideSearchAutocomplete();
+  os();
 }
 
 function buildStats(){
@@ -642,8 +706,9 @@ const PS=24;
 
 function os(){
   const q=n(document.getElementById('si').value),g=document.getElementById('gf').value,so=document.getElementById('ss').value;
-  fltData=AD.filter(r=>{
-    const nm=!q||n(r[cols.name]||'').includes(q);
+  fltData=AD.filter((r,idx)=>{
+    const searchText=foodSearchByIndex.get(idx)||n(r[cols.name]||'');
+    const nm=!q||searchText.includes(q);
     const gm=!g||r[cols.group]===g;
     return nm&&gm;
   });
@@ -658,7 +723,7 @@ function os(){
   curPage=0;renderCards();if(document.getElementById('vt').checked)renderTable();
 }
 
-function cf(){document.getElementById('si').value='';document.getElementById('gf').value='';document.getElementById('ss').value='';os();}
+function cf(){document.getElementById('si').value='';document.getElementById('gf').value='';document.getElementById('ss').value='';hideSearchAutocomplete();os();}
 
 function renderCards(){
   const cont=document.getElementById('cards-view');
@@ -844,8 +909,6 @@ function ucb(){
 // ==========================================
 // RANKING
 // ==========================================
-let rkChart;
-
 function getSelectedGroupFilter(){
   const raw=String(document.getElementById('rg').value||'').trim();
   if(!raw)return '';
@@ -867,11 +930,6 @@ function doRank(){
   d.sort((a,b)=>ord==='desc'?(pN(b[col])||0)-(pN(a[col])||0):(pN(a[col])||0)-(pN(b[col])||0));
   d=d.slice(0,top);
   const gcs=d.map(r=>gc(r[cols.group]||''));
-  if(rkChart)rkChart.destroy();
-  rkChart=new Chart(document.getElementById('rnk-c'),{type:'bar',
-    data:{labels:d.map(r=>wrapChartLabel(foodLabelByIndex.get(AD.indexOf(r))||r[cols.name],28)),
-      datasets:[{label:displayColName(col),data:d.map(r=>pN(r[col])),backgroundColor:gcs.map(c=>c+'cc'),borderColor:gcs,borderWidth:1.5,borderRadius:5}]},
-    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${displayColName(col)}: ${fmtNum(ctx.parsed.x)}`}}},scales:{x:{beginAtZero:true,ticks:{callback:v=>fmtNum(v)}}}}});
   const medals=['🥇','🥈','🥉'];
   document.getElementById('rnk-tbl').innerHTML=`<thead class="table-light"><tr><th>#</th><th>Alimento</th>${cols.group?'<th>Grupo</th>':''}<th>${displayColName(col)}</th></tr></thead>
   <tbody>${d.map((r,i)=>{
