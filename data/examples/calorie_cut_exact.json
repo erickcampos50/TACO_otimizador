@@ -1,0 +1,53 @@
+{
+  "id": "calorie_cut_exact",
+  "sort_order": 20,
+  "title": "Corte calórico com solver exato",
+  "description": "Mostra um cenário de redução calórica com regras mais rígidas, útil para aprender o modo exato.",
+  "learning_goal": "Ajuda a enxergar como limites de energia, verduras e faixas por refeição empurram a solução para alimentos mais leves.",
+  "student_tip": "Observe como frutas, verduras e proteínas magras passam a dominar quando a energia máxima fica apertada.",
+  "tags": ["minimize calories", "solver exato", "grupo TACO", "metas por refeição"],
+  "payload": {
+    "candidate_foods": [
+      {"code": 221, "enabled": true, "min_g": 0, "max_g": 180, "selection_min_g": 60, "meal": "Café da manhã", "planner_group": "Fruta"},
+      {"code": 208, "enabled": true, "min_g": 0, "max_g": 220, "selection_min_g": 80, "meal": "Café da manhã", "planner_group": "Fruta"},
+      {"code": 449, "enabled": true, "min_g": 0, "max_g": 250, "selection_min_g": 100, "meal": "Café da manhã", "planner_group": "Laticínio"},
+      {"code": 488, "enabled": true, "min_g": 0, "max_g": 120, "selection_min_g": 50, "meal": "Café da manhã", "planner_group": "Proteína"},
+      {"code": 410, "enabled": true, "min_g": 0, "max_g": 220, "selection_min_g": 80, "meal": "Almoço", "planner_group": "Proteína"},
+      {"code": 3, "enabled": true, "min_g": 0, "max_g": 160, "selection_min_g": 60, "meal": "Almoço", "planner_group": "Cereal"},
+      {"code": 561, "enabled": true, "min_g": 0, "max_g": 160, "selection_min_g": 60, "meal": "Almoço", "planner_group": "Leguminosa"},
+      {"code": 100, "enabled": true, "min_g": 0, "max_g": 180, "selection_min_g": 50, "meal": "Almoço", "planner_group": "Verdura"},
+      {"code": 79, "enabled": true, "min_g": 0, "max_g": 120, "selection_min_g": 40, "meal": "Almoço", "planner_group": "Verdura"},
+      {"code": 157, "enabled": true, "min_g": 0, "max_g": 150, "selection_min_g": 40, "meal": "Almoço", "planner_group": "Verdura"},
+      {"code": 88, "enabled": true, "min_g": 0, "max_g": 180, "selection_min_g": 70, "meal": "Jantar", "planner_group": "Tubérculo"},
+      {"code": 488, "enabled": true, "min_g": 0, "max_g": 120, "selection_min_g": 50, "meal": "Jantar", "planner_group": "Proteína"}
+    ],
+    "nutrient_constraints": [
+      {"nutrient": "Energia (kcal)", "mode": "max", "min_value": null, "max_value": 1300, "ideal_value": null, "weight": 1},
+      {"nutrient": "Proteína (g)", "mode": "min", "min_value": 70, "max_value": null, "ideal_value": null, "weight": 1.4},
+      {"nutrient": "Fibra Alimentar (g)", "mode": "min", "min_value": 18, "max_value": null, "ideal_value": null, "weight": 1}
+    ],
+    "group_constraints": [
+      {"group": "Verduras, hortaliças e derivados", "min_g": 180, "max_g": 420}
+    ],
+    "planner_group_constraints": [],
+    "planner_group_cardinality_constraints": [],
+    "meal_constraints": [
+      {"meal": "Café da manhã", "min_g": 220, "max_g": 480},
+      {"meal": "Almoço", "min_g": 350, "max_g": 700},
+      {"meal": "Jantar", "min_g": 180, "max_g": 400}
+    ],
+    "meal_nutrient_constraints": [
+      {"meal": "Jantar", "nutrient": "Energia (kcal)", "mode": "max", "min_value": null, "max_value": 350, "ideal_value": null, "weight": 1},
+      {"meal": "Almoço", "nutrient": "Proteína (g)", "mode": "min", "min_value": 30, "max_value": null, "ideal_value": null, "weight": 1.2}
+    ],
+    "meal_planner_group_constraints": [],
+    "meal_planner_group_cardinality_constraints": [],
+    "settings": {
+      "objective_mode": "minimize_calories",
+      "solver_mode": "exact",
+      "total_min_g": 780,
+      "total_max_g": 1250,
+      "objective_weights": {"calories": 1, "protein": 1, "cost": 1, "grams": 0, "deviation": 1}
+    }
+  }
+}

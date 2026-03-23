@@ -3,42 +3,137 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TACO Optimizer</title>
+  <title>TACO Optimizer | Planejador alimentar</title>
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
   <div class="app-shell">
     <header class="hero">
-      <div>
-        <h1>TACO Optimizer</h1>
-        <p class="subtitle">Webapp local para otimização quantitativa de alimentos da TACO com metas globais, por refeição, por grupos customizados e cardinalidade de itens.</p>
+      <div class="hero-copy">
+        <p class="eyebrow">Planejador alimentar com base TACO</p>
+        <h1>Monte combinações de alimentos com metas claras e passo a passo</h1>
+        <p class="subtitle">Este app ajuda a montar um plano em gramas a partir dos alimentos permitidos, metas nutricionais e limites por refeição. Você informa as regras, e o sistema procura a melhor combinação possível.</p>
+        <div class="hero-actions">
+          <a class="quick-link" href="#quickStart">Como começar</a>
+          <a class="quick-link" href="#candidateSection">Adicionar alimentos</a>
+          <a class="quick-link" href="#solverSection">Calcular cardápio</a>
+          <a class="quick-link" href="#resultSection">Entender resultado</a>
+        </div>
       </div>
-      <div class="hero-note">
-        <strong>Base:</strong> TACO unificada ajustada<br/>
+      <aside class="hero-note" aria-live="polite">
+        <strong>Base carregada com sucesso.</strong>
         <span id="metaCounts">Carregando metadados…</span>
-      </div>
+      </aside>
     </header>
+
+    <nav class="jump-nav" aria-label="Atalhos da página">
+      <a href="#quickStart">Guia rápido</a>
+      <a href="#candidateSection">Etapa 1</a>
+      <a href="#goalsSection">Etapa 2</a>
+      <a href="#advancedSection">Opcional</a>
+      <a href="#solverSection">Gerar</a>
+      <a href="#resultSection">Resultado</a>
+    </nav>
 
     <datalist id="foodList"></datalist>
     <datalist id="mealNamesList"></datalist>
     <datalist id="plannerGroupNamesList"></datalist>
 
-    <section class="panel">
-      <h2>1. Alimentos candidatos</h2>
+    <section class="panel intro-panel" id="quickStart">
+      <div class="section-intro">
+        <div>
+          <p class="eyebrow">Guia rápido</p>
+          <h2>Como usar sem conhecer otimização</h2>
+          <p class="section-text">Pense nesta tela como um montador de cardápio: você lista as opções, informa o que quer atingir e o sistema devolve uma sugestão automática.</p>
+        </div>
+        <div class="highlight-callout">
+          <strong>Comece simples</strong>
+          <p>Use poucos alimentos e poucas metas na primeira tentativa. Depois refine até chegar no comportamento desejado.</p>
+        </div>
+      </div>
+
+      <div class="grid three-col onboarding-grid">
+        <article class="guide-card">
+          <span class="guide-step">1</span>
+          <h3>Escolha os alimentos</h3>
+          <p>Adicione apenas os itens que podem aparecer no cardápio. Cada linha vira uma opção que o sistema pode usar.</p>
+        </article>
+        <article class="guide-card">
+          <span class="guide-step">2</span>
+          <h3>Defina regras</h3>
+          <p>Informe mínimos, máximos ou valores ideais para nutrientes, grupos e refeições.</p>
+        </article>
+        <article class="guide-card">
+          <span class="guide-step">3</span>
+          <h3>Gere e confira</h3>
+          <p>Clique em <strong>Calcular cardápio</strong> e leia primeiro os cartões-resumo e a tabela de alimentos sugeridos.</p>
+        </article>
+      </div>
+
+      <div class="grid two-col explainer-grid">
+        <article class="mini-panel">
+          <h3>Termos importantes</h3>
+          <ul class="plain-list">
+            <li><strong>Refeição</strong>: nome livre como Café da manhã, Almoço ou Jantar.</li>
+            <li><strong>Grupo customizado</strong>: categoria criada por você, como Fruta, Proteína ou Cereal.</li>
+            <li><strong>Mín g / Máx g</strong>: faixa permitida para cada alimento.</li>
+            <li><strong>Ideal</strong>: valor desejado; o sistema tenta se aproximar dele.</li>
+            <li><strong>Cardinalidade</strong>: quantidade de itens escolhidos, e não a quantidade em gramas.</li>
+          </ul>
+        </article>
+        <article class="mini-panel">
+          <h3>Ordem sugerida</h3>
+          <ol class="plain-list ordered-list">
+            <li>Adicione os alimentos candidatos.</li>
+            <li>Preencha refeições e grupos customizados se precisar organizar o plano.</li>
+            <li>Configure as metas nutricionais do dia.</li>
+            <li>Se necessário, acrescente metas por refeição.</li>
+            <li>Use as seções opcionais apenas para regras mais avançadas.</li>
+          </ol>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel" id="candidateSection">
+      <div class="section-intro compact">
+        <div>
+          <p class="panel-kicker">Etapa 1</p>
+          <h2>Adicione os alimentos que podem entrar no plano</h2>
+          <p class="section-text">Cada linha representa uma opção em gramas. Você pode repetir o mesmo alimento em refeições diferentes para permitir usos separados.</p>
+        </div>
+        <span class="info-chip">Essencial</span>
+      </div>
+
       <div class="toolbar wrap">
-        <input id="foodSearch" list="foodList" placeholder="Buscar por código ou descrição" />
+        <input id="foodSearch" list="foodList" placeholder="Ex.: arroz, banana, feijão ou código TACO" />
         <button id="addFoodBtn">Adicionar alimento</button>
         <button id="downloadTemplateBtn" class="ghost">Baixar template CSV</button>
         <label class="file-label ghost">
           Importar CSV
           <input id="candidateFileInput" type="file" accept=".csv" hidden />
         </label>
-        <button id="clearFoodsBtn" class="ghost danger">Limpar alimentos</button>
+        <button id="clearFoodsBtn" class="ghost danger">Limpar tudo</button>
       </div>
-      <div class="help-text">Cada linha representa uma variável de decisão em gramas. Você pode repetir o mesmo alimento em refeições diferentes e atribuir um grupo customizado para montar a lógica do cardápio.</div>
-      <div class="help-text">O campo <strong>selection_min_g</strong> define a quantidade mínima para um alimento contar como “selecionado” nas regras de cardinalidade.</div>
+
+      <div class="grid three-col field-guide">
+        <article class="mini-panel">
+          <h3>Refeição</h3>
+          <p>Use nomes simples para separar horários do dia. Isso permite aplicar metas específicas, como proteína mínima no almoço.</p>
+        </article>
+        <article class="mini-panel">
+          <h3>Grupo customizado</h3>
+          <p>Crie categorias práticas do seu cardápio, como Fruta, Proteína, Cereal ou Laticínio.</p>
+        </article>
+        <article class="mini-panel">
+          <h3>Limites do alimento</h3>
+          <p><strong>selection_min_g</strong> diz qual quantidade mínima faz o item contar como escolhido nas regras de cardinalidade.</p>
+        </article>
+      </div>
+
+      <div class="help-text">Se estiver em dúvida, preencha primeiro <strong>Refeição</strong>, <strong>Grupo customizado</strong> e um <strong>Máx g</strong> razoável para cada alimento.</div>
       <div id="mealNamesInfo" class="help-text">Refeições detectadas: —</div>
       <div id="plannerGroupsInfo" class="help-text">Grupos customizados detectados: —</div>
+
       <div class="table-wrap">
         <table id="foodsTable">
           <thead>
@@ -61,10 +156,27 @@
       </div>
     </section>
 
-    <section class="grid two-col">
+    <section class="panel section-banner" id="goalsSection">
+      <div class="section-intro compact">
+        <div>
+          <p class="panel-kicker">Etapa 2</p>
+          <h2>Defina as metas principais do dia e das refeições</h2>
+          <p class="section-text">As quatro seções abaixo resolvem a maior parte dos casos. Se você só precisa montar um cardápio com metas básicas, provavelmente ficará por aqui.</p>
+        </div>
+        <span class="info-chip info-chip-soft">CONFIGURAÇÃO BÁSICA</span>
+      </div>
+    </section>
+
+    <section class="panel section-banner">
       <div class="panel">
-        <h2>2. Restrições nutricionais globais</h2>
-        <div class="toolbar"><button id="addNutrientConstraintBtn">Adicionar restrição</button></div>
+        <div class="section-intro compact">
+          <div>
+            <h2>2. Metas nutricionais do dia</h2>
+            <p class="section-text">Diga o mínimo, o máximo ou o valor ideal para nutrientes no plano inteiro.</p>
+          </div>
+        </div>
+        <div class="toolbar"><button id="addNutrientConstraintBtn">Adicionar meta</button></div>
+        <div class="help-text">Exemplo: energia entre 1.200 e 1.600 kcal ou proteína mínima de 90 g.</div>
         <div class="table-wrap tall">
           <table id="nutrientTable">
             <thead>
@@ -84,8 +196,14 @@
       </div>
 
       <div class="panel">
-        <h2>3. Restrições por grupo TACO (globais)</h2>
-        <div class="toolbar"><button id="addGroupConstraintBtn">Adicionar restrição</button></div>
+        <div class="section-intro compact">
+          <div>
+            <h2>3. Limites por grupo TACO no dia</h2>
+            <p class="section-text">Controle quanto de cada grupo da base TACO pode aparecer no resultado final.</p>
+          </div>
+        </div>
+        <div class="toolbar"><button id="addGroupConstraintBtn">Adicionar limite</button></div>
+        <div class="help-text">Útil para restringir, por exemplo, o total de açúcares ou de grupos específicos da base.</div>
         <div class="table-wrap">
           <table id="groupTable">
             <thead>
@@ -102,11 +220,16 @@
       </div>
     </section>
 
-    <section class="grid two-col">
+    <section class="panel section-banner">
       <div class="panel">
-        <h2>4. Restrições de total por refeição</h2>
-        <div class="toolbar"><button id="addMealConstraintBtn">Adicionar restrição</button></div>
-        <div class="help-text">Controla gramas totais por refeição, como almoço entre 350 g e 650 g.</div>
+        <div class="section-intro compact">
+          <div>
+            <h2>4. Peso total por refeição</h2>
+            <p class="section-text">Define a faixa total de gramas para cada refeição.</p>
+          </div>
+        </div>
+        <div class="toolbar"><button id="addMealConstraintBtn">Adicionar limite</button></div>
+        <div class="help-text">Exemplo: almoço entre 350 g e 650 g.</div>
         <div class="table-wrap">
           <table id="mealTable">
             <thead>
@@ -123,9 +246,14 @@
       </div>
 
       <div class="panel">
-        <h2>5. Restrições nutricionais por refeição</h2>
-        <div class="toolbar"><button id="addMealNutrientConstraintBtn">Adicionar restrição</button></div>
-        <div class="help-text">Permite metas específicas por refeição, como proteína mínima no almoço ou energia máxima no jantar.</div>
+        <div class="section-intro compact">
+          <div>
+            <h2>5. Metas nutricionais por refeição</h2>
+            <p class="section-text">Aplique metas específicas para cada horário do dia.</p>
+          </div>
+        </div>
+        <div class="toolbar"><button id="addMealNutrientConstraintBtn">Adicionar meta</button></div>
+        <div class="help-text">Exemplo: café da manhã com energia máxima ou almoço com proteína mínima.</div>
         <div class="table-wrap tall">
           <table id="mealNutrientTable">
             <thead>
@@ -146,107 +274,166 @@
       </div>
     </section>
 
-    <section class="grid two-col">
-      <div class="panel">
-        <h2>6. Limites globais por grupo customizado</h2>
-        <div class="toolbar"><button id="addPlannerGroupConstraintBtn">Adicionar restrição</button></div>
-        <div class="help-text">Use os grupos customizados definidos nos alimentos candidatos para impor mínimos, máximos, faixas ou ideais no dia inteiro.</div>
-        <div class="table-wrap">
-          <table id="plannerGroupTable">
-            <thead>
-              <tr>
-                <th>Grupo customizado</th>
-                <th>Modo</th>
-                <th>Mín g</th>
-                <th>Máx g</th>
-                <th>Ideal g</th>
-                <th>Peso</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
+    <section class="panel section-banner" id="advancedSection">
+      <div class="section-intro compact">
+        <div>
+          <p class="panel-kicker">Opcional</p>
+          <h2>Regras avançadas para grupos criados por você</h2>
+          <p class="section-text">Abra estas seções apenas se quiser controlar categorias próprias, como Fruta, Proteína ou Cereal, ou ainda a quantidade de itens escolhidos.</p>
         </div>
-      </div>
-
-      <div class="panel">
-        <h2>7. Limites por grupo dentro da refeição</h2>
-        <div class="toolbar"><button id="addMealPlannerGroupConstraintBtn">Adicionar restrição</button></div>
-        <div class="help-text">Permite impor, por exemplo, fruta mínima no café da manhã, proteína máxima no jantar ou cereal ideal no almoço.</div>
-        <div class="table-wrap">
-          <table id="mealPlannerGroupTable">
-            <thead>
-              <tr>
-                <th>Refeição</th>
-                <th>Grupo customizado</th>
-                <th>Modo</th>
-                <th>Mín g</th>
-                <th>Máx g</th>
-                <th>Ideal g</th>
-                <th>Peso</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
+        <span class="info-chip">CONFIGURAÇÃO AVANÇADA</span>
       </div>
     </section>
 
-    <section class="grid two-col">
-      <div class="panel">
-        <h2>8. Cardinalidade global por grupo customizado</h2>
-        <div class="toolbar"><button id="addPlannerGroupCardinalityConstraintBtn">Adicionar restrição</button></div>
-        <div class="help-text">Exemplos: no dia, escolher exatamente 2 itens de Fruta ou no máximo 3 itens de Proteína.</div>
-        <div class="table-wrap">
-          <table id="plannerGroupCardinalityTable">
-            <thead>
-              <tr>
-                <th>Grupo customizado</th>
-                <th>Modo</th>
-                <th>Mín itens</th>
-                <th>Máx itens</th>
-                <th>Exato</th>
-                <th>Ideal</th>
-                <th>Peso</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
+    <details class="accordion-panel">
+      <summary>
+        <div>
+          <p class="panel-kicker">Opcional</p>
+          <h2>6 e 7. Limites por grupo customizado</h2>
+          <p class="section-text">Use quando quiser dizer, por exemplo, quanta fruta deve existir no dia ou no café da manhã.</p>
         </div>
+        <span class="summary-badge">Clique para preencher</span>
+      </summary>
+      <div class="accordion-body grid one-col">
+        <section class="panel nested-panel">
+          <div class="section-intro compact">
+            <div>
+              <h2>6. Limites globais por grupo customizado</h2>
+              <p class="section-text">Aplica regras ao dia inteiro usando as categorias que você criou nos alimentos candidatos.</p>
+            </div>
+          </div>
+          <div class="toolbar"><button id="addPlannerGroupConstraintBtn">Adicionar limite</button></div>
+          <div class="help-text">Exemplo: fruta entre 150 g e 300 g no dia inteiro.</div>
+          <div class="table-wrap">
+            <table id="plannerGroupTable">
+              <thead>
+                <tr>
+                  <th>Grupo customizado</th>
+                  <th>Modo</th>
+                  <th>Mín g</th>
+                  <th>Máx g</th>
+                  <th>Ideal g</th>
+                  <th>Peso</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel nested-panel">
+          <div class="section-intro compact">
+            <div>
+              <h2>7. Limites por grupo dentro da refeição</h2>
+              <p class="section-text">Aplica regras a uma refeição específica usando os grupos criados por você.</p>
+            </div>
+          </div>
+          <div class="toolbar"><button id="addMealPlannerGroupConstraintBtn">Adicionar limite</button></div>
+          <div class="help-text">Exemplo: proteína ideal no almoço ou fruta mínima no café da manhã.</div>
+          <div class="table-wrap">
+            <table id="mealPlannerGroupTable">
+              <thead>
+                <tr>
+                  <th>Refeição</th>
+                  <th>Grupo customizado</th>
+                  <th>Modo</th>
+                  <th>Mín g</th>
+                  <th>Máx g</th>
+                  <th>Ideal g</th>
+                  <th>Peso</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </details>
+
+    <details class="accordion-panel">
+      <summary>
+        <div>
+          <p class="panel-kicker">Opcional</p>
+          <h2>8 e 9. Quantidade de itens por grupo</h2>
+          <p class="section-text">Use quando a regra depender do número de itens selecionados, e não do total em gramas.</p>
+        </div>
+        <span class="summary-badge">Clique para preencher</span>
+      </summary>
+      <div class="accordion-body grid one-col">
+        <section class="panel nested-panel">
+          <div class="section-intro compact">
+            <div>
+              <h2>8. Cardinalidade global por grupo customizado</h2>
+              <p class="section-text">Controla quantos itens de um grupo aparecem no dia inteiro.</p>
+            </div>
+          </div>
+          <div class="toolbar"><button id="addPlannerGroupCardinalityConstraintBtn">Adicionar regra</button></div>
+          <div class="help-text">Exemplo: no dia, escolher exatamente 2 itens de Fruta.</div>
+          <div class="table-wrap">
+            <table id="plannerGroupCardinalityTable">
+              <thead>
+                <tr>
+                  <th>Grupo customizado</th>
+                  <th>Modo</th>
+                  <th>Mín itens</th>
+                  <th>Máx itens</th>
+                  <th>Exato</th>
+                  <th>Ideal</th>
+                  <th>Peso</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel nested-panel">
+          <div class="section-intro compact">
+            <div>
+              <h2>9. Cardinalidade por grupo dentro da refeição</h2>
+              <p class="section-text">Controla quantos itens de um grupo aparecem em uma refeição específica.</p>
+            </div>
+          </div>
+          <div class="toolbar"><button id="addMealPlannerGroupCardinalityConstraintBtn">Adicionar regra</button></div>
+          <div class="help-text">Exemplo: no almoço, exatamente 1 item de Proteína.</div>
+          <div class="table-wrap">
+            <table id="mealPlannerGroupCardinalityTable">
+              <thead>
+                <tr>
+                  <th>Refeição</th>
+                  <th>Grupo customizado</th>
+                  <th>Modo</th>
+                  <th>Mín itens</th>
+                  <th>Máx itens</th>
+                  <th>Exato</th>
+                  <th>Ideal</th>
+                  <th>Peso</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </details>
+
+    <section class="panel" id="solverSection">
+      <div class="section-intro compact">
+        <div>
+          <p class="panel-kicker">Etapa 3</p>
+          <h2>Defina como a sugestão será gerada</h2>
+          <p class="section-text">Escolha o objetivo principal e diga se o sistema deve aceitar apenas soluções exatas ou a melhor aproximação possível quando as regras forem difíceis de cumprir ao mesmo tempo.</p>
+        </div>
+        <span class="info-chip">CONFIGURAR CÁLCULOS</span>
       </div>
 
-      <div class="panel">
-        <h2>9. Cardinalidade por grupo dentro da refeição</h2>
-        <div class="toolbar"><button id="addMealPlannerGroupCardinalityConstraintBtn">Adicionar restrição</button></div>
-        <div class="help-text">Exemplos: no almoço, exatamente 1 item de Proteína; no café da manhã, no máximo 2 itens de Fruta.</div>
-        <div class="table-wrap">
-          <table id="mealPlannerGroupCardinalityTable">
-            <thead>
-              <tr>
-                <th>Refeição</th>
-                <th>Grupo customizado</th>
-                <th>Modo</th>
-                <th>Mín itens</th>
-                <th>Máx itens</th>
-                <th>Exato</th>
-                <th>Ideal</th>
-                <th>Peso</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <section class="panel">
-      <h2>10. Configuração do solver</h2>
       <div class="grid four-col">
         <label>
-          Objetivo
+          Objetivo principal
           <select id="objectiveMode">
             <option value="target_matching">Bater metas com menor desvio</option>
             <option value="minimize_calories">Minimizar calorias</option>
@@ -256,7 +443,7 @@
           </select>
         </label>
         <label>
-          Modo do solver
+          Como o solver deve agir
           <select id="solverMode">
             <option value="exact">Apenas soluções factíveis</option>
             <option value="approximate">Melhor aproximação quando inviável</option>
@@ -271,36 +458,88 @@
           <input id="totalMaxG" type="number" step="0.01" />
         </label>
       </div>
+
       <div class="grid five-col custom-weights" id="customWeightsPanel">
-        <label>peso calorias <input id="wCalories" type="number" step="0.01" value="1" /></label>
-        <label>peso proteína <input id="wProtein" type="number" step="0.01" value="1" /></label>
-        <label>peso custo <input id="wCost" type="number" step="0.01" value="1" /></label>
-        <label>peso gramas <input id="wGrams" type="number" step="0.01" value="0" /></label>
-        <label>peso desvios ideais <input id="wDeviation" type="number" step="0.01" value="1" /></label>
+        <label>Peso de calorias <input id="wCalories" type="number" step="0.01" value="1" /></label>
+        <label>Peso de proteína <input id="wProtein" type="number" step="0.01" value="1" /></label>
+        <label>Peso de custo <input id="wCost" type="number" step="0.01" value="1" /></label>
+        <label>Peso de gramas <input id="wGrams" type="number" step="0.01" value="0" /></label>
+        <label>Peso de desvios ideais <input id="wDeviation" type="number" step="0.01" value="1" /></label>
       </div>
-      <div class="help-text">No modo aproximado, mínimos, máximos, faixas e cardinalidades exatas podem ser violados com penalização. Cardinalidade usa variáveis binárias e observa selection_min_g.</div>
+
+      <div class="help-text">Sugestão para começar: use <strong>Bater metas com menor desvio</strong> e <strong>Melhor aproximação quando inviável</strong>.</div>
+      <div class="help-text">No modo aproximado, mínimos, máximos, faixas e cardinalidades exatas podem ser violados com penalização. Regras de cardinalidade usam <strong>selection_min_g</strong>.</div>
     </section>
 
+    <details class="accordion-panel" closed>
+      <summary>
+        <div>
+          <p class="panel-kicker">Apoio para iniciantes</p>
+          <h2>Exemplos guiados para aprender a usar a aplicação</h2>
+          <p class="section-text">Se você está no primeiro período de Nutrição, use estes cenários prontos para observar como metas, refeições, grupos e custos mudam o cardápio sugerido.</p>
+        </div>
+        <span class="summary-badge">Clique para abrir</span>
+      </summary>
+      <div class="accordion-body">
+        <!-- <section class="panel nested-panel examples-inner-panel"> -->
+          <div class="section-intro compact">
+            <div>
+              <h2>Estude um cenário antes de montar do zero</h2>
+              <p class="section-text">Cada exemplo já vem preenchido e foi pensado para mostrar uma funcionalidade importante do otimizador. Carregue um deles, calcule a solução e compare as regras configuradas com o resultado final.</p>
+            </div>
+            <span class="info-chip info-chip-soft">EXEMPLOS GUIADOS</span>
+          </div>
+          <div class="toolbar wrap example-toolbar">
+            <label class="example-field">
+              Escolha um exemplo para estudar
+              <select id="examplePresetSelect" disabled>
+                <option value="">Escolha um exemplo pronto</option>
+              </select>
+            </label>
+            <button id="loadExampleBtn" class="ghost" disabled>Aplicar exemplo</button>
+          </div>
+          <div class="help-text">Esses exemplos ajudam usuários iniciantes a entender o fluxo da aplicação sem precisar preencher tudo manualmente logo no primeiro contato.</div>
+          <div id="exampleDescription" class="example-description">Escolha um cenário para ver o que ele ensina e, depois, use o painel seguinte para calcular o cardápio otimizado.</div>
+          <div id="exampleLearningList" class="grid two-col learning-grid"></div>
+        </section>
+      </div>
+    </details>
+
     <section class="panel sticky-actions">
+      <div class="section-intro compact">
+        <div>
+          <h2>Calcular e exportar a solução</h2>
+          <p class="section-text">Depois de configurar manualmente ou aplicar um exemplo, clique em "Calcular cardápio". Se o resultado fizer sentido para o estudo, você pode exportá-lo em CSV.</p>
+        </div>
+      </div>
       <div class="toolbar wrap">
-        <button id="solveBtn" class="primary">Otimizar</button>
-        <button id="loadExampleBtn" class="ghost">Carregar exemplo</button>
+        <button id="solveBtn" class="primary">Calcular cardápio</button>
         <button id="exportResultBtn" class="ghost" disabled>Exportar solução em CSV</button>
       </div>
       <div id="errorBox" class="message error hidden"></div>
       <div id="warningBox" class="message warning hidden"></div>
     </section>
 
-    <section class="panel results-panel">
-      <h2>11. Resultado</h2>
+    <section class="panel results-panel" id="resultSection">
+      <div class="section-intro compact">
+        <div>
+          <p class="panel-kicker">Etapa 4</p>
+          <h2>Entenda a solução sugerida</h2>
+          <p class="section-text">Leia primeiro os cartões-resumo, depois a tabela de alimentos e o resumo por refeição. As seções recolhíveis abaixo servem para auditoria detalhada.</p>
+        </div>
+        <span class="info-chip info-chip-soft">RESULTADOS</span>
+      </div>
+
       <div class="grid four-col metrics" id="resultMetrics">
         <div class="metric-card"><span>Status</span><strong id="metricStatus">—</strong></div>
-        <div class="metric-card"><span>Objetivo</span><strong id="metricObjective">—</strong></div>
+        <div class="metric-card"><span>Objetivo aplicado</span><strong id="metricObjective">—</strong></div>
         <div class="metric-card"><span>Total de gramas</span><strong id="metricGrams">—</strong></div>
         <div class="metric-card"><span>Custo estimado</span><strong id="metricCost">—</strong></div>
       </div>
 
-      <h3>Alimentos otimizados</h3>
+      <div class="results-note">Se esta área estiver vazia, ainda não foi gerada nenhuma solução.</div>
+
+      <h3>Alimentos sugeridos</h3>
       <div class="table-wrap">
         <table id="resultFoodsTable">
           <thead>
@@ -362,102 +601,108 @@
         </table>
       </div>
 
-      <h3>Metas ativas de grupos customizados (gramas)</h3>
-      <div class="table-wrap">
-        <table id="groupConstraintsResultTable">
-          <thead>
-            <tr>
-              <th>Escopo</th>
-              <th>Grupo customizado</th>
-              <th>Refeição</th>
-              <th>Modo</th>
-              <th>Realizado</th>
-              <th>Mín</th>
-              <th>Máx</th>
-              <th>Ideal</th>
-              <th>Desvio</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
+      <details class="result-accordion">
+        <summary>Auditoria das metas configuradas</summary>
 
-      <h3>Metas ativas de cardinalidade por grupo</h3>
-      <div class="table-wrap">
-        <table id="groupCardinalityResultTable">
-          <thead>
-            <tr>
-              <th>Escopo</th>
-              <th>Grupo customizado</th>
-              <th>Refeição</th>
-              <th>Modo</th>
-              <th>Realizado</th>
-              <th>Mín itens</th>
-              <th>Máx itens</th>
-              <th>Exato/Ideal</th>
-              <th>Desvio</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
+        <h3>Metas ativas de grupos customizados (gramas)</h3>
+        <div class="table-wrap">
+          <table id="groupConstraintsResultTable">
+            <thead>
+              <tr>
+                <th>Escopo</th>
+                <th>Grupo customizado</th>
+                <th>Refeição</th>
+                <th>Modo</th>
+                <th>Realizado</th>
+                <th>Mín</th>
+                <th>Máx</th>
+                <th>Ideal</th>
+                <th>Desvio</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
 
-      <h3>Metas globais ativas</h3>
-      <div class="table-wrap">
-        <table id="constraintsResultTable">
-          <thead>
-            <tr>
-              <th>Nutriente</th>
-              <th>Modo</th>
-              <th>Realizado</th>
-              <th>Mín</th>
-              <th>Máx</th>
-              <th>Ideal</th>
-              <th>Desvio</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
+        <h3>Metas ativas de cardinalidade por grupo</h3>
+        <div class="table-wrap">
+          <table id="groupCardinalityResultTable">
+            <thead>
+              <tr>
+                <th>Escopo</th>
+                <th>Grupo customizado</th>
+                <th>Refeição</th>
+                <th>Modo</th>
+                <th>Realizado</th>
+                <th>Mín itens</th>
+                <th>Máx itens</th>
+                <th>Exato/Ideal</th>
+                <th>Desvio</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
 
-      <h3>Metas por refeição ativas</h3>
-      <div class="table-wrap">
-        <table id="mealConstraintsResultTable">
-          <thead>
-            <tr>
-              <th>Refeição</th>
-              <th>Escopo</th>
-              <th>Modo</th>
-              <th>Realizado</th>
-              <th>Mín</th>
-              <th>Máx</th>
-              <th>Ideal</th>
-              <th>Desvio</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
+        <h3>Metas globais ativas</h3>
+        <div class="table-wrap">
+          <table id="constraintsResultTable">
+            <thead>
+              <tr>
+                <th>Nutriente</th>
+                <th>Modo</th>
+                <th>Realizado</th>
+                <th>Mín</th>
+                <th>Máx</th>
+                <th>Ideal</th>
+                <th>Desvio</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
 
-      <h3>Totais por nutriente</h3>
-      <div class="toolbar"><input id="nutrientFilter" placeholder="Filtrar nutrientes" /></div>
-      <div class="table-wrap tall">
-        <table id="resultNutrientsTable">
-          <thead>
-            <tr>
-              <th>Nutriente</th>
-              <th>Total</th>
-              <th>Restrição</th>
-              <th>Campos ausentes nos candidatos</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
+        <h3>Metas por refeição ativas</h3>
+        <div class="table-wrap">
+          <table id="mealConstraintsResultTable">
+            <thead>
+              <tr>
+                <th>Refeição</th>
+                <th>Escopo</th>
+                <th>Modo</th>
+                <th>Realizado</th>
+                <th>Mín</th>
+                <th>Máx</th>
+                <th>Ideal</th>
+                <th>Desvio</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </details>
+
+      <details class="result-accordion">
+        <summary>Totais detalhados por nutriente</summary>
+        <div class="toolbar"><input id="nutrientFilter" placeholder="Filtrar nutrientes" /></div>
+        <div class="table-wrap tall">
+          <table id="resultNutrientsTable">
+            <thead>
+              <tr>
+                <th>Nutriente</th>
+                <th>Total</th>
+                <th>Restrição</th>
+                <th>Campos ausentes nos candidatos</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </details>
     </section>
   </div>
 

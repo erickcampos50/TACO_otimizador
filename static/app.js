@@ -9,12 +9,50 @@ const state = {
   mealNutrientConstraints: [],
   mealPlannerGroupConstraints: [],
   mealPlannerGroupCardinalityConstraints: [],
+  examples: [],
   result: null,
 };
 
 const $ = (id) => document.getElementById(id);
 const fmt = (value, digits = 2) => (value === null || value === undefined || Number.isNaN(Number(value)) ? '—' : Number(value).toFixed(digits));
 const rowId = (prefix) => `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+const OBJECTIVE_LABELS = {
+  target_matching: 'Bater metas com menor desvio',
+  minimize_calories: 'Minimizar calorias',
+  maximize_protein: 'Maximizar proteína',
+  minimize_cost: 'Minimizar custo',
+  custom_weighted: 'Objetivo ponderado customizado',
+};
+const SOLVER_LABELS = {
+  exact: 'Apenas soluções factíveis',
+  approximate: 'Melhor aproximação quando inviável',
+};
+const MODE_LABELS = {
+  none: 'Nenhum',
+  min: 'Mínimo',
+  max: 'Máximo',
+  range: 'Faixa',
+  ideal: 'Ideal',
+  exact: 'Exato',
+};
+const RUN_STATUS_LABELS = {
+  optimal: 'Solução encontrada',
+  optimal_with_violations: 'Solução encontrada com ajustes aproximados',
+};
+const SCOPE_LABELS = {
+  global_group: 'Dia inteiro',
+  meal_group: 'Por refeição',
+  planner_group_global: 'Grupo no dia inteiro',
+  planner_group_meal: 'Grupo dentro da refeição',
+  planner_group_global_count: 'Itens do grupo no dia inteiro',
+  planner_group_meal_count: 'Itens do grupo na refeição',
+  meal_total: 'Peso total da refeição',
+  meal_nutrient: 'Meta nutricional da refeição',
+};
+
+function labelFor(map, value) {
+  return map[value] || value || '—';
+}
 
 function csvEscape(text) {
   const s = String(text ?? '');
@@ -88,6 +126,116 @@ async function fetchMeta() {
   renderAllTables();
 }
 
+async function fetchExamples() {
+  try {
+    const res = await fetch('/api/examples');
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail?.errors?.join('\n') || 'Não foi possível carregar os exemplos.');
+    state.examples = data.examples || [];
+    renderExamplePicker();
+  } catch (err) {
+    state.examples = [];
+    renderExamplePicker();
+    setMessage($('warningBox'), [`Exemplos prontos indisponíveis: ${String(err)}`]);
+  }
+}
+
+function renderExamplePicker() {
+  const select = $('examplePresetSelect');
+  const previousValue = select.value;
+  select.innerHTML = '<option value="">Escolha um exemplo pronto</option>';
+  state.examples.forEach((example) => {
+    const option = document.createElement('option');
+    option.value = example.id;
+    option.textContent = example.title;
+    select.appendChild(option);
+  });
+  if (state.examples.some((example) => example.id === previousValue)) {
+    select.value = previousValue;
+  }
+  renderExampleLearningList();
+  updateExampleDescription();
+}
+
+function renderExampleLearningList() {
+  const container = $('exampleLearningList');
+  if (!container) return;
+  const selectedId = $('examplePresetSelect')?.value;
+  container.innerHTML = '';
+  if (!state.examples.length) {
+    const emptyState = document.createElement('article');
+    emptyState.className = 'learning-card';
+    const title = document.createElement('h3');
+    title.textContent = 'Nenhum exemplo pronto disponível';
+    const text = document.createElement('p');
+    text.textContent = 'Quando os exemplos estiverem disponíveis, este painel vai resumir como cada cenário ajuda a estudar a aplicação.';
+    emptyState.append(title, text);
+    container.appendChild(emptyState);
+    return;
+  }
+
+  state.examples.forEach((example, index) => {
+    const card = document.createElement('article');
+    card.className = 'learning-card';
+    if (example.id === selectedId) {
+      card.classList.add('is-selected');
+    }
+
+    const order = document.createElement('p');
+    order.className = 'note-label';
+    order.textContent = `Exemplo ${index + 1}`;
+
+    const title = document.createElement('h3');
+    title.textContent = example.title;
+
+    const description = document.createElement('p');
+    description.textContent = example.description;
+
+    const goalLabel = document.createElement('p');
+    goalLabel.className = 'learning-label';
+    goalLabel.textContent = 'O que você aprende';
+
+    const goal = document.createElement('p');
+    goal.textContent = example.learning_goal || 'Mostra uma forma diferente de combinar metas e restrições.';
+
+    const tipLabel = document.createElement('p');
+    tipLabel.className = 'learning-label';
+    tipLabel.textContent = 'Como observar o resultado';
+
+    const tip = document.createElement('p');
+    tip.textContent = example.student_tip || 'Carregue o cenário e compare as regras configuradas com o cardápio encontrado.';
+
+    card.append(order, title, description, goalLabel, goal, tipLabel, tip);
+
+    if (example.tags?.length) {
+      const tags = document.createElement('div');
+      tags.className = 'example-tags';
+      example.tags.forEach((tag) => {
+        const chip = document.createElement('span');
+        chip.className = 'example-tag';
+        chip.textContent = tag;
+        tags.appendChild(chip);
+      });
+      card.appendChild(tags);
+    }
+
+    container.appendChild(card);
+  });
+}
+
+function updateExampleDescription() {
+  const select = $('examplePresetSelect');
+  const selected = state.examples.find((item) => item.id === select.value);
+  select.disabled = !state.examples.length;
+  $('loadExampleBtn').disabled = !selected;
+  renderExampleLearningList();
+  $('exampleDescription').textContent = selected
+    ? `${selected.description} O que este exemplo ensina: ${selected.learning_goal || 'comparar regras e resultado.'} Para estudar melhor: ${selected.student_tip || 'calcule o cardápio e observe o que mudou.'}${selected.tags?.length ? ` Destaques: ${selected.tags.join(' · ')}.` : ''}`
+    : (state.examples.length
+      ? 'Escolha um cenário para aprender com uma configuração pronta. Esses exemplos mostram, em linguagem prática, como metas, custos, refeições e grupos alteram o cardápio calculado.'
+      : 'Nenhum exemplo pronto disponível no momento.');
+}
+
 function buildFoodDatalist() {
   const list = $('foodList');
   list.innerHTML = '';
@@ -140,6 +288,65 @@ function addFood(food, overrides = {}) {
     cost_per_100g: overrides.cost_per_100g ?? '',
   });
   renderFoodsTable();
+}
+
+function buildFoodRow(food, overrides = {}) {
+  return {
+    row_id: overrides.row_id || rowId('food'),
+    enabled: overrides.enabled !== false,
+    code: Number(food.code),
+    description: food.description,
+    group: food.group || '',
+    planner_group: overrides.planner_group || '',
+    meal: overrides.meal || '',
+    min_g: overrides.min_g ?? 0,
+    max_g: overrides.max_g ?? '',
+    selection_min_g: overrides.selection_min_g ?? 1,
+    cost_per_100g: overrides.cost_per_100g ?? '',
+  };
+}
+
+function hydrateExampleFoods(candidateFoods = []) {
+  return candidateFoods
+    .map((item) => {
+      const food = state.meta?.foods.find((entry) => Number(entry.code) === Number(item.code));
+      return food ? buildFoodRow(food, item) : null;
+    })
+    .filter(Boolean);
+}
+
+function hydrateRows(rows = [], prefix) {
+  return rows.map((item) => ({
+    ...item,
+    row_id: item.row_id || rowId(prefix),
+  }));
+}
+
+function applyExamplePayload(payload) {
+  resetAllInputs();
+  state.foods = hydrateExampleFoods(payload.candidate_foods || []);
+  state.nutrientConstraints = hydrateRows(payload.nutrient_constraints || [], 'nc');
+  state.groupConstraints = hydrateRows(payload.group_constraints || [], 'gc');
+  state.plannerGroupConstraints = hydrateRows(payload.planner_group_constraints || [], 'pgc');
+  state.plannerGroupCardinalityConstraints = hydrateRows(payload.planner_group_cardinality_constraints || [], 'pgcc');
+  state.mealConstraints = hydrateRows(payload.meal_constraints || [], 'mc');
+  state.mealNutrientConstraints = hydrateRows(payload.meal_nutrient_constraints || [], 'mnc');
+  state.mealPlannerGroupConstraints = hydrateRows(payload.meal_planner_group_constraints || [], 'mpgc');
+  state.mealPlannerGroupCardinalityConstraints = hydrateRows(payload.meal_planner_group_cardinality_constraints || [], 'mpgcc');
+
+  renderAllTables();
+
+  const settings = payload.settings || {};
+  $('objectiveMode').value = settings.objective_mode || 'target_matching';
+  $('solverMode').value = settings.solver_mode || 'exact';
+  $('totalMinG').value = settings.total_min_g ?? '';
+  $('totalMaxG').value = settings.total_max_g ?? '';
+  $('wCalories').value = settings.objective_weights?.calories ?? 1;
+  $('wProtein').value = settings.objective_weights?.protein ?? 1;
+  $('wCost').value = settings.objective_weights?.cost ?? 1;
+  $('wGrams').value = settings.objective_weights?.grams ?? 0;
+  $('wDeviation').value = settings.objective_weights?.deviation ?? 1;
+  toggleCustomWeights();
 }
 
 function removeFood(rowIdValue) {
@@ -615,7 +822,7 @@ async function solve() {
   setMessage($('errorBox'), [], true);
   setMessage($('warningBox'), [], true);
   $('solveBtn').disabled = true;
-  $('solveBtn').textContent = 'Otimizando...';
+  $('solveBtn').textContent = 'Calculando cardápio...';
   try {
     const payload = collectPayload();
     const res = await fetch('/api/optimize', {
@@ -634,14 +841,14 @@ async function solve() {
     setMessage($('errorBox'), [String(err)]);
   } finally {
     $('solveBtn').disabled = false;
-    $('solveBtn').textContent = 'Otimizar';
+    $('solveBtn').textContent = 'Calcular cardápio';
   }
 }
 
 function renderResult() {
   const r = state.result;
-  $('metricStatus').textContent = r.status;
-  $('metricObjective').textContent = `${r.objective_mode} / ${r.solver_mode}`;
+  $('metricStatus').textContent = labelFor(RUN_STATUS_LABELS, r.status);
+  $('metricObjective').textContent = `${labelFor(OBJECTIVE_LABELS, r.objective_mode)} · ${labelFor(SOLVER_LABELS, r.solver_mode)}`;
   $('metricGrams').textContent = `${fmt(r.total_grams)} g`;
   $('metricCost').textContent = fmt(r.total_estimated_cost);
   setMessage($('warningBox'), r.warnings || [], !(r.warnings || []).length);
@@ -693,7 +900,7 @@ function renderResult() {
   (r.planner_group_summaries || []).forEach((item) => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td>${item.scope}</td>
+      <td>${labelFor(SCOPE_LABELS, item.scope)}</td>
       <td>${item.group}</td>
       <td>${item.meal || '—'}</td>
       <td>${item.food_count}</td>
@@ -708,10 +915,10 @@ function renderResult() {
   (r.active_group_constraints || []).forEach((item) => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td>${item.scope}</td>
+      <td>${labelFor(SCOPE_LABELS, item.scope)}</td>
       <td>${item.group}</td>
       <td>${item.meal || '—'}</td>
-      <td>${item.mode}</td>
+      <td>${labelFor(MODE_LABELS, item.mode)}</td>
       <td>${fmt(item.realized, 4)}</td>
       <td>${item.min_value == null ? '—' : fmt(item.min_value, 4)}</td>
       <td>${item.max_value == null ? '—' : fmt(item.max_value, 4)}</td>
@@ -727,10 +934,10 @@ function renderResult() {
   (r.active_group_cardinality_constraints || []).forEach((item) => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td>${item.scope}</td>
+      <td>${labelFor(SCOPE_LABELS, item.scope)}</td>
       <td>${item.group}</td>
       <td>${item.meal || '—'}</td>
-      <td>${item.mode}</td>
+      <td>${labelFor(MODE_LABELS, item.mode)}</td>
       <td>${fmt(item.realized, 0)}</td>
       <td>${item.min_value == null ? '—' : fmt(item.min_value, 0)}</td>
       <td>${item.max_value == null ? '—' : fmt(item.max_value, 0)}</td>
@@ -747,7 +954,7 @@ function renderResult() {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${item.nutrient}</td>
-      <td>${item.mode}</td>
+      <td>${labelFor(MODE_LABELS, item.mode)}</td>
       <td>${fmt(item.realized, 4)}</td>
       <td>${item.min_value == null ? '—' : fmt(item.min_value, 4)}</td>
       <td>${item.max_value == null ? '—' : fmt(item.max_value, 4)}</td>
@@ -764,8 +971,8 @@ function renderResult() {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${item.meal}</td>
-      <td>${item.constraint_label}</td>
-      <td>${item.mode}</td>
+      <td>${labelFor(SCOPE_LABELS, item.scope) === 'Meta nutricional da refeição' ? item.constraint_label : labelFor(SCOPE_LABELS, item.scope)}</td>
+      <td>${labelFor(MODE_LABELS, item.mode)}</td>
       <td>${fmt(item.realized, 4)}</td>
       <td>${item.min_value == null ? '—' : fmt(item.min_value, 4)}</td>
       <td>${item.max_value == null ? '—' : fmt(item.max_value, 4)}</td>
@@ -789,7 +996,7 @@ function renderNutrientResults() {
     .forEach((item) => {
       const tr = document.createElement('tr');
       const restriction = item.constraint
-        ? `${item.constraint.mode} | min=${item.constraint.min_value ?? '—'} | max=${item.constraint.max_value ?? '—'} | ideal=${item.constraint.ideal_value ?? '—'}`
+        ? `${labelFor(MODE_LABELS, item.constraint.mode)} | mín=${item.constraint.min_value ?? '—'} | máx=${item.constraint.max_value ?? '—'} | ideal=${item.constraint.ideal_value ?? '—'}`
         : '—';
       tr.innerHTML = `
         <td>${item.nutrient}</td>
@@ -1018,6 +1225,10 @@ function resetAllInputs() {
   state.result = null;
   renderAllTables();
   $('exportResultBtn').disabled = true;
+  $('metricStatus').textContent = '—';
+  $('metricObjective').textContent = '—';
+  $('metricGrams').textContent = '—';
+  $('metricCost').textContent = '—';
   $('resultFoodsTable').querySelector('tbody').innerHTML = '';
   $('mealSummaryTable').querySelector('tbody').innerHTML = '';
   $('plannerGroupSummaryTable').querySelector('tbody').innerHTML = '';
@@ -1026,55 +1237,34 @@ function resetAllInputs() {
   $('constraintsResultTable').querySelector('tbody').innerHTML = '';
   $('mealConstraintsResultTable').querySelector('tbody').innerHTML = '';
   $('resultNutrientsTable').querySelector('tbody').innerHTML = '';
+  setMessage($('errorBox'), [], true);
+  setMessage($('warningBox'), [], true);
 }
 
-function loadExample() {
-  resetAllInputs();
-  [
-    'Mamão, Papaia, cru',
-    'Banana, prata, crua',
-    'Leite, de vaca, integral',
-    'Pão, trigo, francês',
-    'Frango, peito, sem pele, grelhado',
-    'Carne, bovina, patinho, sem gordura, grelhado',
-    'Arroz, tipo 1, cozido',
-    'Feijão, carioca, cozido',
-    'Alface, lisa, crua',
-    'Batata, inglesa, cozida',
-  ].forEach((token) => addFood(findFoodByInput(token)));
-
-  const setup = [
-    { idx: 0, meal: 'Café da manhã', planner_group: 'Fruta', max_g: 200, selection_min_g: 60 },
-    { idx: 1, meal: 'Café da manhã', planner_group: 'Fruta', max_g: 180, selection_min_g: 60 },
-    { idx: 2, meal: 'Café da manhã', planner_group: 'Laticínio', max_g: 300, selection_min_g: 100 },
-    { idx: 3, meal: 'Café da manhã', planner_group: 'Cereal', max_g: 120, selection_min_g: 40 },
-    { idx: 4, meal: 'Almoço', planner_group: 'Proteína', max_g: 250, selection_min_g: 80 },
-    { idx: 5, meal: 'Almoço', planner_group: 'Proteína', max_g: 220, selection_min_g: 80 },
-    { idx: 6, meal: 'Almoço', planner_group: 'Cereal', max_g: 250, selection_min_g: 70 },
-    { idx: 7, meal: 'Almoço', planner_group: 'Leguminosa', max_g: 220, selection_min_g: 70 },
-    { idx: 8, meal: 'Almoço', planner_group: 'Verdura', max_g: 120, selection_min_g: 30 },
-    { idx: 9, meal: 'Almoço', planner_group: 'Tubérculo', max_g: 250, selection_min_g: 70 },
-  ];
-  setup.forEach(({ idx, ...rest }) => Object.assign(state.foods[idx], rest));
-  renderFoodsTable();
-
-  addNutrientConstraint({ nutrient: 'Energia (kcal)', mode: 'range', min_value: 900, max_value: 1300, weight: 1 });
-  addNutrientConstraint({ nutrient: 'Proteína (g)', mode: 'min', min_value: 55, weight: 2 });
-  addMealConstraint({ meal: 'Café da manhã', min_g: 250, max_g: 600 });
-  addMealConstraint({ meal: 'Almoço', min_g: 350, max_g: 900 });
-  addMealNutrientConstraint({ meal: 'Café da manhã', nutrient: 'Energia (kcal)', mode: 'range', min_value: 250, max_value: 500, weight: 1 });
-  addMealPlannerGroupConstraint({ meal: 'Almoço', group: 'Leguminosa', mode: 'range', min_g: 70, max_g: 180, weight: 1 });
-  addPlannerGroupConstraint({ group: 'Fruta', mode: 'range', min_g: 80, max_g: 250, weight: 1 });
-  addPlannerGroupConstraint({ group: 'Proteína', mode: 'min', min_g: 140, weight: 1.2 });
-  addPlannerGroupCardinalityConstraint({ group: 'Fruta', mode: 'max', max_count: 2, weight: 1 });
-  addMealPlannerGroupCardinalityConstraint({ meal: 'Almoço', group: 'Proteína', mode: 'exact', exact_count: 1, weight: 1.5 });
-  addMealPlannerGroupCardinalityConstraint({ meal: 'Café da manhã', group: 'Fruta', mode: 'max', max_count: 2, weight: 1 });
-
-  $('objectiveMode').value = 'target_matching';
-  $('solverMode').value = 'approximate';
-  $('totalMinG').value = 650;
-  $('totalMaxG').value = 1400;
-  toggleCustomWeights();
+async function loadSelectedExample() {
+  const exampleId = $('examplePresetSelect').value;
+  if (!exampleId) {
+    setMessage($('warningBox'), ['Escolha um exemplo antes de carregar.']);
+    return;
+  }
+  setMessage($('errorBox'), [], true);
+  setMessage($('warningBox'), [], true);
+  $('loadExampleBtn').disabled = true;
+  $('loadExampleBtn').textContent = 'Carregando exemplo...';
+  try {
+    const res = await fetch(`/api/examples/${encodeURIComponent(exampleId)}`);
+    const data = await res.json();
+    if (!res.ok) {
+      setMessage($('errorBox'), data.detail?.errors || ['Não foi possível carregar o exemplo.']);
+      return;
+    }
+    applyExamplePayload(data.payload || {});
+  } catch (err) {
+    setMessage($('errorBox'), [String(err)]);
+  } finally {
+    $('loadExampleBtn').textContent = 'Aplicar exemplo';
+    updateExampleDescription();
+  }
 }
 
 function parseCsvLine(line) {
@@ -1143,10 +1333,11 @@ function bindEvents() {
   $('addMealPlannerGroupConstraintBtn').addEventListener('click', () => addMealPlannerGroupConstraint());
   $('addMealPlannerGroupCardinalityConstraintBtn').addEventListener('click', () => addMealPlannerGroupCardinalityConstraint());
   $('solveBtn').addEventListener('click', solve);
-  $('loadExampleBtn').addEventListener('click', loadExample);
+  $('loadExampleBtn').addEventListener('click', loadSelectedExample);
   $('exportResultBtn').addEventListener('click', exportResultCsv);
   $('nutrientFilter').addEventListener('input', renderNutrientResults);
   $('objectiveMode').addEventListener('change', toggleCustomWeights);
+  $('examplePresetSelect').addEventListener('change', updateExampleDescription);
   $('downloadTemplateBtn').addEventListener('click', () => { window.location.href = '/api/download/candidate-template'; });
   $('candidateFileInput').addEventListener('change', async (event) => {
     const file = event.target.files?.[0];
@@ -1160,6 +1351,7 @@ function bindEvents() {
 (async function init() {
   bindEvents();
   await fetchMeta();
+  await fetchExamples();
   refreshMealDatalist();
   refreshPlannerGroupDatalist();
 })();

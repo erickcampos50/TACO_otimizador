@@ -16,6 +16,7 @@ from scipy.optimize import Bounds, LinearConstraint, milp
 
 BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "data"
+EXAMPLES_DIR = DATA_DIR / "examples"
 STATIC_DIR = BASE_DIR / "static"
 
 APP_TITLE = "TACO Optimizer"
@@ -38,6 +39,20 @@ def _load_data() -> tuple[pd.DataFrame, dict[str, Any], list[str]]:
         meta = json.load(f)
     nutrient_cols = [item["name"] for item in meta["nutrients"]]
     return df, meta, nutrient_cols
+
+
+def _load_example_presets() -> list[dict[str, Any]]:
+    if not EXAMPLES_DIR.exists():
+        return []
+    examples: list[dict[str, Any]] = []
+    for path in sorted(EXAMPLES_DIR.glob("*.json")):
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        data["id"] = str(data.get("id") or path.stem)
+        data["sort_order"] = int(data.get("sort_order", 999))
+        examples.append(data)
+    examples.sort(key=lambda item: (item.get("sort_order", 999), item.get("title", item["id"])))
+    return examples
 
 
 TACO_DF, TACO_META, NUTRIENT_COLS = _load_data()
@@ -1141,6 +1156,26 @@ def meta() -> dict[str, Any]:
 @app.get("/api/download/candidate-template")
 def download_candidate_template() -> FileResponse:
     return FileResponse(DATA_DIR / "candidate_template.csv", filename="candidate_template.csv", media_type="text/csv")
+
+
+@app.get("/api/examples")
+def list_examples() -> dict[str, Any]:
+    examples = _load_example_presets()
+    return {
+        "examples": [
+            {key: value for key, value in item.items() if key not in {"payload", "sort_order"}}
+            for item in examples
+        ]
+    }
+
+
+@app.get("/api/examples/{example_id}")
+def get_example(example_id: str) -> dict[str, Any]:
+    examples = {item["id"]: item for item in _load_example_presets()}
+    example = examples.get(example_id)
+    if not example:
+        raise HTTPException(status_code=404, detail={"errors": [f"Exemplo não encontrado: {example_id}"]})
+    return example
 
 
 @app.post("/api/optimize")

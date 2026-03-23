@@ -1,0 +1,56 @@
+{
+  "id": "balanced_day",
+  "sort_order": 10,
+  "title": "Dia equilibrado com grupos e cardinalidade",
+  "description": "Bom primeiro contato com a aplicação, porque combina regras do dia inteiro com regras por refeição.",
+  "learning_goal": "Ajuda a entender a diferença entre metas do dia, metas por refeição, grupos customizados e quantidade de itens escolhidos.",
+  "student_tip": "Compare as regras em gramas com as regras de cardinalidade para perceber que elas controlam coisas diferentes do cardápio.",
+  "tags": ["target matching", "solver aproximado", "grupos customizados", "cardinalidade"],
+  "payload": {
+    "candidate_foods": [
+      {"code": 226, "enabled": true, "min_g": 0, "max_g": 200, "selection_min_g": 60, "meal": "Café da manhã", "planner_group": "Fruta"},
+      {"code": 182, "enabled": true, "min_g": 0, "max_g": 180, "selection_min_g": 60, "meal": "Café da manhã", "planner_group": "Fruta"},
+      {"code": 458, "enabled": true, "min_g": 0, "max_g": 300, "selection_min_g": 100, "meal": "Café da manhã", "planner_group": "Laticínio"},
+      {"code": 53, "enabled": true, "min_g": 0, "max_g": 120, "selection_min_g": 40, "meal": "Café da manhã", "planner_group": "Cereal"},
+      {"code": 410, "enabled": true, "min_g": 0, "max_g": 250, "selection_min_g": 80, "meal": "Almoço", "planner_group": "Proteína"},
+      {"code": 377, "enabled": true, "min_g": 0, "max_g": 220, "selection_min_g": 80, "meal": "Almoço", "planner_group": "Proteína"},
+      {"code": 3, "enabled": true, "min_g": 0, "max_g": 250, "selection_min_g": 70, "meal": "Almoço", "planner_group": "Cereal"},
+      {"code": 561, "enabled": true, "min_g": 0, "max_g": 220, "selection_min_g": 70, "meal": "Almoço", "planner_group": "Leguminosa"},
+      {"code": 79, "enabled": true, "min_g": 0, "max_g": 120, "selection_min_g": 30, "meal": "Almoço", "planner_group": "Verdura"},
+      {"code": 91, "enabled": true, "min_g": 0, "max_g": 250, "selection_min_g": 70, "meal": "Almoço", "planner_group": "Tubérculo"}
+    ],
+    "nutrient_constraints": [
+      {"nutrient": "Energia (kcal)", "mode": "range", "min_value": 900, "max_value": 1300, "ideal_value": null, "weight": 1},
+      {"nutrient": "Proteína (g)", "mode": "min", "min_value": 55, "max_value": null, "ideal_value": null, "weight": 2}
+    ],
+    "group_constraints": [],
+    "planner_group_constraints": [
+      {"group": "Fruta", "mode": "range", "min_g": 80, "max_g": 250, "ideal_g": null, "weight": 1},
+      {"group": "Proteína", "mode": "min", "min_g": 140, "max_g": null, "ideal_g": null, "weight": 1.2}
+    ],
+    "planner_group_cardinality_constraints": [
+      {"group": "Fruta", "mode": "max", "min_count": null, "max_count": 2, "exact_count": null, "ideal_count": null, "weight": 1}
+    ],
+    "meal_constraints": [
+      {"meal": "Café da manhã", "min_g": 250, "max_g": 600},
+      {"meal": "Almoço", "min_g": 350, "max_g": 900}
+    ],
+    "meal_nutrient_constraints": [
+      {"meal": "Café da manhã", "nutrient": "Energia (kcal)", "mode": "range", "min_value": 250, "max_value": 500, "ideal_value": null, "weight": 1}
+    ],
+    "meal_planner_group_constraints": [
+      {"meal": "Almoço", "group": "Leguminosa", "mode": "range", "min_g": 70, "max_g": 180, "ideal_g": null, "weight": 1}
+    ],
+    "meal_planner_group_cardinality_constraints": [
+      {"meal": "Almoço", "group": "Proteína", "mode": "exact", "min_count": null, "max_count": null, "exact_count": 1, "ideal_count": null, "weight": 1.5},
+      {"meal": "Café da manhã", "group": "Fruta", "mode": "max", "min_count": null, "max_count": 2, "exact_count": null, "ideal_count": null, "weight": 1}
+    ],
+    "settings": {
+      "objective_mode": "target_matching",
+      "solver_mode": "approximate",
+      "total_min_g": 650,
+      "total_max_g": 1400,
+      "objective_weights": {"calories": 1, "protein": 1, "cost": 1, "grams": 0, "deviation": 1}
+    }
+  }
+}

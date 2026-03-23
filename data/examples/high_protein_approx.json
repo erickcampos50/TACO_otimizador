@@ -1,0 +1,61 @@
+{
+  "id": "high_protein_approx",
+  "sort_order": 30,
+  "title": "Dia hiperproteico com regras de refeição",
+  "description": "Explora um dia com foco em proteína, mas ainda respeitando a organização das refeições.",
+  "learning_goal": "Ajuda a entender a diferença entre o objetivo principal do solver e as restrições que continuam valendo durante a otimização.",
+  "student_tip": "Veja como o sistema tenta priorizar proteína, mas ainda precisa obedecer os limites de almoço e jantar.",
+  "tags": ["maximize protein", "solver aproximado", "metas por refeição", "cardinalidade por refeição"],
+  "payload": {
+    "candidate_foods": [
+      {"code": 53, "enabled": true, "min_g": 0, "max_g": 80, "selection_min_g": 30, "meal": "Café da manhã", "planner_group": "Cereal"},
+      {"code": 449, "enabled": true, "min_g": 0, "max_g": 250, "selection_min_g": 100, "meal": "Café da manhã", "planner_group": "Laticínio"},
+      {"code": 488, "enabled": true, "min_g": 0, "max_g": 120, "selection_min_g": 50, "meal": "Café da manhã", "planner_group": "Proteína"},
+      {"code": 461, "enabled": true, "min_g": 0, "max_g": 60, "selection_min_g": 20, "meal": "Café da manhã", "planner_group": "Proteína"},
+      {"code": 410, "enabled": true, "min_g": 0, "max_g": 220, "selection_min_g": 80, "meal": "Almoço", "planner_group": "Proteína"},
+      {"code": 277, "enabled": true, "min_g": 0, "max_g": 160, "selection_min_g": 60, "meal": "Almoço", "planner_group": "Proteína"},
+      {"code": 3, "enabled": true, "min_g": 0, "max_g": 180, "selection_min_g": 60, "meal": "Almoço", "planner_group": "Cereal"},
+      {"code": 561, "enabled": true, "min_g": 0, "max_g": 180, "selection_min_g": 60, "meal": "Almoço", "planner_group": "Leguminosa"},
+      {"code": 100, "enabled": true, "min_g": 0, "max_g": 180, "selection_min_g": 50, "meal": "Almoço", "planner_group": "Verdura"},
+      {"code": 377, "enabled": true, "min_g": 0, "max_g": 220, "selection_min_g": 80, "meal": "Jantar", "planner_group": "Proteína"},
+      {"code": 115, "enabled": true, "min_g": 0, "max_g": 140, "selection_min_g": 50, "meal": "Jantar", "planner_group": "Verdura"},
+      {"code": 157, "enabled": true, "min_g": 0, "max_g": 140, "selection_min_g": 40, "meal": "Jantar", "planner_group": "Verdura"}
+    ],
+    "nutrient_constraints": [
+      {"nutrient": "Proteína (g)", "mode": "min", "min_value": 120, "max_value": null, "ideal_value": null, "weight": 2},
+      {"nutrient": "Energia (kcal)", "mode": "range", "min_value": 1100, "max_value": 1700, "ideal_value": null, "weight": 1},
+      {"nutrient": "Lipídeos (g)", "mode": "max", "min_value": null, "max_value": 65, "ideal_value": null, "weight": 1}
+    ],
+    "group_constraints": [],
+    "planner_group_constraints": [
+      {"group": "Proteína", "mode": "min", "min_g": 220, "max_g": null, "ideal_g": null, "weight": 1.5},
+      {"group": "Verdura", "mode": "min", "min_g": 120, "max_g": null, "ideal_g": null, "weight": 1}
+    ],
+    "planner_group_cardinality_constraints": [
+      {"group": "Proteína", "mode": "max", "min_count": null, "max_count": 4, "exact_count": null, "ideal_count": null, "weight": 1}
+    ],
+    "meal_constraints": [
+      {"meal": "Café da manhã", "min_g": 220, "max_g": 450},
+      {"meal": "Almoço", "min_g": 380, "max_g": 800},
+      {"meal": "Jantar", "min_g": 250, "max_g": 650}
+    ],
+    "meal_nutrient_constraints": [
+      {"meal": "Almoço", "nutrient": "Proteína (g)", "mode": "min", "min_value": 35, "max_value": null, "ideal_value": null, "weight": 1.4},
+      {"meal": "Jantar", "nutrient": "Proteína (g)", "mode": "min", "min_value": 30, "max_value": null, "ideal_value": null, "weight": 1.2}
+    ],
+    "meal_planner_group_constraints": [
+      {"meal": "Jantar", "group": "Verdura", "mode": "min", "min_g": 70, "max_g": null, "ideal_g": null, "weight": 1}
+    ],
+    "meal_planner_group_cardinality_constraints": [
+      {"meal": "Almoço", "group": "Proteína", "mode": "exact", "min_count": null, "max_count": null, "exact_count": 1, "ideal_count": null, "weight": 1.2},
+      {"meal": "Jantar", "group": "Proteína", "mode": "exact", "min_count": null, "max_count": null, "exact_count": 1, "ideal_count": null, "weight": 1.2}
+    ],
+    "settings": {
+      "objective_mode": "maximize_protein",
+      "solver_mode": "approximate",
+      "total_min_g": 900,
+      "total_max_g": 1450,
+      "objective_weights": {"calories": 1, "protein": 1, "cost": 1, "grams": 0, "deviation": 1}
+    }
+  }
+}

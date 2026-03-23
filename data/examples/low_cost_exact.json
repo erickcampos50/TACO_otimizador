@@ -1,0 +1,56 @@
+{
+  "id": "low_cost_exact",
+  "sort_order": 40,
+  "title": "Cardápio econômico com custos preenchidos",
+  "description": "Mostra como o campo de custo altera a escolha dos alimentos quando o orçamento passa a importar.",
+  "learning_goal": "Ajuda a perceber o efeito do custo por 100 g e como ele compete com as metas nutricionais e com a distribuição por refeição.",
+  "student_tip": "Compare este cenário com os outros e observe que o alimento mais nutritivo nem sempre é o mais barato na solução final.",
+  "tags": ["minimize cost", "solver exato", "custos", "grupos customizados"],
+  "payload": {
+    "candidate_foods": [
+      {"code": 53, "enabled": true, "min_g": 0, "max_g": 120, "selection_min_g": 40, "cost_per_100g": 1.2, "meal": "Café da manhã", "planner_group": "Cereal"},
+      {"code": 182, "enabled": true, "min_g": 0, "max_g": 180, "selection_min_g": 60, "cost_per_100g": 0.55, "meal": "Café da manhã", "planner_group": "Fruta"},
+      {"code": 458, "enabled": true, "min_g": 0, "max_g": 250, "selection_min_g": 100, "cost_per_100g": 0.45, "meal": "Café da manhã", "planner_group": "Laticínio"},
+      {"code": 488, "enabled": true, "min_g": 0, "max_g": 120, "selection_min_g": 50, "cost_per_100g": 1.1, "meal": "Café da manhã", "planner_group": "Proteína"},
+      {"code": 3, "enabled": true, "min_g": 0, "max_g": 250, "selection_min_g": 70, "cost_per_100g": 0.35, "meal": "Almoço", "planner_group": "Cereal"},
+      {"code": 561, "enabled": true, "min_g": 0, "max_g": 200, "selection_min_g": 70, "cost_per_100g": 0.45, "meal": "Almoço", "planner_group": "Leguminosa"},
+      {"code": 398, "enabled": true, "min_g": 0, "max_g": 220, "selection_min_g": 80, "cost_per_100g": 0.75, "meal": "Almoço", "planner_group": "Proteína"},
+      {"code": 79, "enabled": true, "min_g": 0, "max_g": 80, "selection_min_g": 30, "cost_per_100g": 0.25, "meal": "Almoço", "planner_group": "Verdura"},
+      {"code": 157, "enabled": true, "min_g": 0, "max_g": 100, "selection_min_g": 30, "cost_per_100g": 0.35, "meal": "Almoço", "planner_group": "Verdura"},
+      {"code": 91, "enabled": true, "min_g": 0, "max_g": 220, "selection_min_g": 70, "cost_per_100g": 0.3, "meal": "Jantar", "planner_group": "Tubérculo"},
+      {"code": 488, "enabled": true, "min_g": 0, "max_g": 120, "selection_min_g": 50, "cost_per_100g": 1.1, "meal": "Jantar", "planner_group": "Proteína"}
+    ],
+    "nutrient_constraints": [
+      {"nutrient": "Energia (kcal)", "mode": "range", "min_value": 1000, "max_value": 1500, "ideal_value": null, "weight": 1},
+      {"nutrient": "Proteína (g)", "mode": "min", "min_value": 60, "max_value": null, "ideal_value": null, "weight": 1.5}
+    ],
+    "group_constraints": [
+      {"group": "Leguminosas e derivados", "min_g": 70, "max_g": 200}
+    ],
+    "planner_group_constraints": [
+      {"group": "Fruta", "mode": "min", "min_g": 80, "max_g": null, "ideal_g": null, "weight": 1},
+      {"group": "Proteína", "mode": "min", "min_g": 140, "max_g": null, "ideal_g": null, "weight": 1.3}
+    ],
+    "planner_group_cardinality_constraints": [],
+    "meal_constraints": [
+      {"meal": "Café da manhã", "min_g": 250, "max_g": 500},
+      {"meal": "Almoço", "min_g": 400, "max_g": 850},
+      {"meal": "Jantar", "min_g": 200, "max_g": 450}
+    ],
+    "meal_nutrient_constraints": [],
+    "meal_planner_group_constraints": [
+      {"meal": "Almoço", "group": "Verdura", "mode": "min", "min_g": 60, "max_g": null, "ideal_g": null, "weight": 1}
+    ],
+    "meal_planner_group_cardinality_constraints": [
+      {"meal": "Almoço", "group": "Proteína", "mode": "exact", "min_count": null, "max_count": null, "exact_count": 1, "ideal_count": null, "weight": 1},
+      {"meal": "Jantar", "group": "Proteína", "mode": "exact", "min_count": null, "max_count": null, "exact_count": 1, "ideal_count": null, "weight": 1}
+    ],
+    "settings": {
+      "objective_mode": "minimize_cost",
+      "solver_mode": "exact",
+      "total_min_g": 850,
+      "total_max_g": 1450,
+      "objective_weights": {"calories": 1, "protein": 1, "cost": 1, "grams": 0, "deviation": 1}
+    }
+  }
+}
