@@ -33,6 +33,11 @@ class TacoOptimizerApiTests(unittest.TestCase):
         self.assertGreater(len(data['foods']), 100)
         self.assertGreater(len(data['nutrients']), 20)
 
+    def test_healthcheck_endpoint(self):
+        res = self.client.get('/healthz')
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.json()['status'], 'ok')
+
     def test_candidate_template_download(self):
         res = self.client.get('/api/download/candidate-template')
         self.assertEqual(res.status_code, 200)

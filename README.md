@@ -21,6 +21,19 @@ pip install -r requirements.txt
 python main.py
 ```
 
+## Deploy no Render
+
+O projeto agora inclui `render.yaml`, `.python-version` e um health check em `/healthz`.
+
+Fluxo sugerido no Render:
+
+```bash
+Build Command: pip install -r requirements.txt
+Start Command: uvicorn main:app --host 0.0.0.0 --port $PORT
+```
+
+Se usar Blueprint, basta criar o serviço a partir do arquivo `render.yaml` do repositório.
+
 ## O que a aplicação suporta
 
 - alimentos candidatos selecionados pelo usuário

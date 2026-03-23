@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import math
+import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -1216,7 +1217,12 @@ def optimize(req: OptimizationRequest) -> dict[str, Any]:
     return build_and_solve(req)
 
 
+@app.get("/healthz")
+def healthcheck() -> dict[str, str]:
+    return {"status": "ok", "service": APP_TITLE}
+
+
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="127.0.0.1", port=5589)
+    uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", "5589")))
