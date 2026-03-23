@@ -853,6 +853,7 @@ function renderResult() {
   $('metricCost').textContent = fmt(r.total_estimated_cost);
   setMessage($('warningBox'), r.warnings || [], !(r.warnings || []).length);
   $('exportResultBtn').disabled = false;
+  window.tacoReporting?.setReportButtonsEnabled(true);
 
   const foodBody = $('resultFoodsTable').querySelector('tbody');
   foodBody.innerHTML = '';
@@ -1225,6 +1226,7 @@ function resetAllInputs() {
   state.result = null;
   renderAllTables();
   $('exportResultBtn').disabled = true;
+  window.tacoReporting?.setReportButtonsEnabled(false);
   $('metricStatus').textContent = '—';
   $('metricObjective').textContent = '—';
   $('metricGrams').textContent = '—';
@@ -1240,6 +1242,12 @@ function resetAllInputs() {
   setMessage($('errorBox'), [], true);
   setMessage($('warningBox'), [], true);
 }
+
+window.tacoOptimizerApp = {
+  getResult: () => state.result,
+  getErrorBox: () => $('errorBox'),
+  setMessage,
+};
 
 async function loadSelectedExample() {
   const exampleId = $('examplePresetSelect').value;

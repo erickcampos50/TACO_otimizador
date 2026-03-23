@@ -9,10 +9,17 @@ import numpy as np
 import pandas as pd
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from scipy.optimize import Bounds, LinearConstraint, milp
+
+from reporting import (
+    DetailedReportRequest,
+    build_markdown_report,
+    build_pdf_report,
+    report_download_name,
+)
 
 BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "data"
@@ -1176,6 +1183,32 @@ def get_example(example_id: str) -> dict[str, Any]:
     if not example:
         raise HTTPException(status_code=404, detail={"errors": [f"Exemplo não encontrado: {example_id}"]})
     return example
+
+
+@app.post("/api/reports/markdown")
+def export_markdown_report(req: DetailedReportRequest) -> Response:
+    try:
+        content = build_markdown_report(req.result)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail={"errors": [str(exc)]}) from exc
+    return Response(
+        content=content.encode("utf-8"),
+        media_type="text/markdown; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="{report_download_name("md")}"'},
+    )
+
+
+@app.post("/api/reports/pdf")
+def export_pdf_report(req: DetailedReportRequest) -> Response:
+    try:
+        content = build_pdf_report(req.result)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail={"errors": [str(exc)]}) from exc
+    return Response(
+        content=content,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{report_download_name("pdf")}"'},
+    )
 
 
 @app.post("/api/optimize")

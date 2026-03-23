@@ -515,7 +515,10 @@
       <div class="toolbar wrap">
         <button id="solveBtn" class="primary">Calcular cardápio</button>
         <button id="exportResultBtn" class="ghost" disabled>Exportar solução em CSV</button>
+        <button id="exportReportPdfBtn" class="ghost" disabled>Relatório em PDF</button>
+        <button id="exportReportMarkdownBtn" class="ghost" disabled>Relatório em Markdown</button>
       </div>
+      <div class="help-text">Os relatórios foram pensados para apoiar alunos de Nutrição na explicação do cardápio: eles organizam refeições, metas e alertas em linguagem mais didática para apresentação ao paciente.</div>
       <div id="errorBox" class="message error hidden"></div>
       <div id="warningBox" class="message warning hidden"></div>
     </section>
@@ -706,6 +709,7 @@
     </section>
   </div>
 
+  <script src="/static/reporting.js"></script>
   <script src="/static/app.js"></script>
 </body>
 </html>
