@@ -25,7 +25,10 @@ body{background:#f0f7f4;font-family:'Segoe UI',sans-serif;margin:0}
 /* ---- SEARCH ---- */
 .search-wrap{padding:.85rem 1.5rem;background:#fff;border-bottom:1px solid #e2e8f0}
 /* ---- PILLS ---- */
-#group-pills{padding:.5rem 1.5rem .4rem;background:#fff;border-bottom:1px solid #e2e8f0;display:flex;gap:.35rem;flex-wrap:wrap}
+.group-pills{padding:.5rem 1.5rem .4rem;background:#fff;border-bottom:1px solid #e2e8f0;display:flex;gap:.35rem;flex-wrap:wrap}
+.group-pill{border:1.5px solid transparent;border-radius:2rem;padding:.15rem .65rem;cursor:pointer;transition:all .15s;font-size:.68rem;font-weight:800}
+.group-pill.active{box-shadow:0 2px 6px rgba(0,0,0,.08);transform:translateY(-1px)}
+@media(max-width:767.98px){.desktop-only{display:none !important}}
 /* ---- SECTION HDR ---- */
 .sec-hdr{padding:.6rem 1.5rem;display:flex;align-items:center;justify-content:space-between;font-size:.85rem}
 /* ---- CARDS ---- */
@@ -110,18 +113,13 @@ body{background:#f0f7f4;font-family:'Segoe UI',sans-serif;margin:0}
   <div id="tab-explorar">
     <div class="search-wrap">
       <div class="row g-2">
-        <div class="col-12 col-md-5">
+        <div class="col-12 col-md-7">
           <div class="input-group">
             <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-success"></i></span>
             <input type="text" id="si" class="form-control border-start-0" list="food-list" placeholder="Digite para buscar..." oninput="os()" autocomplete="off">
           </div>
         </div>
-        <div class="col-6 col-md-3">
-          <select id="gf" class="form-select" onchange="os()">
-            <option value="">Todos os grupos</option>
-          </select>
-        </div>
-        <div class="col-6 col-md-3">
+        <div class="col-12 col-md-4">
           <select id="ss" class="form-select" onchange="os()">
             <option value="">Ordenar por…</option>
             <option value="energy_desc">Calorias ↓</option>
@@ -138,7 +136,7 @@ body{background:#f0f7f4;font-family:'Segoe UI',sans-serif;margin:0}
         </div>
       </div>
     </div>
-    <div id="group-pills"></div>
+    <div id="group-pills" class="desktop-only"></div>
     <div class="sec-hdr">
       <span id="rc" class="text-muted fw-semibold"></span>
       <div class="d-flex align-items-center gap-2">
@@ -225,12 +223,7 @@ body{background:#f0f7f4;font-family:'Segoe UI',sans-serif;margin:0}
               <label class="form-label fw-bold">Nutriente</label>
               <select id="rn" class="form-select"></select>
             </div>
-            <div class="col-12 col-md-3">
-              <label class="form-label fw-bold">Grupo alimentar</label>
-              <input id="rg" class="form-control" list="rg-list" placeholder="Digite para buscar..." autocomplete="off">
-              <datalist id="rg-list"></datalist>
-            </div>
-            <div class="col-6 col-md-2">
+            <div class="col-6 col-md-3">
               <label class="form-label fw-bold">Top</label>
               <select id="rt" class="form-select">
                 <option value="5">Top 5</option>
@@ -238,18 +231,22 @@ body{background:#f0f7f4;font-family:'Segoe UI',sans-serif;margin:0}
                 <option value="20">Top 20</option>
               </select>
             </div>
-            <div class="col-6 col-md-2">
+            <div class="col-6 col-md-3">
               <label class="form-label fw-bold">Ordem</label>
               <select id="ro" class="form-select">
                 <option value="desc">Maior → Menor</option>
                 <option value="asc">Menor → Maior</option>
               </select>
             </div>
-            <div class="col-12 col-md-1">
+            <div class="col-12 col-md-2">
               <button class="btn btn-warning w-100 fw-bold" onclick="doRank()" title="Gerar ranking">
                 <i class="bi bi-trophy-fill"></i>
               </button>
             </div>
+          </div>
+          <div class="desktop-only mt-3">
+            <label class="form-label fw-bold mb-2">Grupo alimentar</label>
+            <div id="group-pills-rg" class="group-pills"></div>
           </div>
         </div>
       </div>
@@ -300,7 +297,8 @@ body{background:#f0f7f4;font-family:'Segoe UI',sans-serif;margin:0}
 // ==========================================
 // DATA LAYER
 // ==========================================
-let AD=[], cols={}, groups=[], numCols=[], foodChoices=[], foodLookup=new Map(), foodLabelByIndex=new Map(), foodSearchByIndex=new Map(), groupLookup=new Map(), displayColCounts={};
+let AD=[], cols={}, groups=[], numCols=[], foodChoices=[], foodLookup=new Map(), foodLabelByIndex=new Map(), foodSearchByIndex=new Map(), displayColCounts={};
+let exploreGroupFilter='', rankGroupFilter='';
 
 const CMAP={
   code:   ['codigo taco','codigo','code'],
@@ -379,6 +377,12 @@ function displayColBase(h){
   return DISPLAY_COL_LABELS[h]||h;
 }
 
+function displayColUnit(h){
+  const raw=String(h||'').trim();
+  const m=raw.match(/\(([^)]+)\)\s*$/);
+  return m?m[1].trim():'';
+}
+
 function displayColSuffix(h){
   const raw=String(h||'').trim();
   if(!raw)return '';
@@ -397,11 +401,14 @@ function prepareDisplayCols(){
 }
 
 function displayColName(h,{unique=true}={}){
+  const raw=String(h||'').trim();
   const base=displayColBase(h);
-  if(!unique)return base;
-  if((displayColCounts[base]||0)<=1)return base;
+  const unit=base!==raw?displayColUnit(h):'';
+  const label=unit?`${base} (${unit})`:base;
+  if(!unique)return label;
+  if((displayColCounts[base]||0)<=1)return label;
   const suffix=displayColSuffix(h);
-  return suffix?`${base} (${suffix})`:base;
+  return suffix?`${label} (${suffix})`:label;
 }
 
 function preferredSelectCols(){
@@ -459,7 +466,6 @@ function buildAutocompleteModels(){
   foodLookup=new Map(foodChoices.map(o=>[n(o.label),o.index]));
   foodLabelByIndex=new Map(foodChoices.map(o=>[o.index,o.label]));
   foodSearchByIndex=new Map(foodChoices.map(o=>[o.index,o.search]));
-  groupLookup=new Map(groups.map(g=>[n(g),g]));
 }
 
 function resolveFoodIndex(raw){
@@ -468,14 +474,6 @@ function resolveFoodIndex(raw){
   if(foodLookup.has(key))return foodLookup.get(key);
   const matches=foodChoices.filter(o=>o.search.includes(key));
   return matches.length===1?matches[0].index:null;
-}
-
-function resolveGroupValue(raw){
-  const key=n(raw);
-  if(!key)return '';
-  if(groupLookup.has(key))return groupLookup.get(key);
-  const matches=groups.filter(g=>n(g).includes(key));
-  return matches.length===1?matches[0]:null;
 }
 
 const htmlLegendPlugin={
@@ -561,7 +559,7 @@ function gc(g){
 // BUILD UI
 // ==========================================
 function buildUI(){
-  buildStats();buildGroupFilter();buildCmpSelects();buildRankControls();
+  buildStats();buildGroupPills();buildCmpSelects();buildRankControls();
   fltData=[...AD];curPage=0;renderCards();
 }
 
@@ -575,28 +573,46 @@ function buildStats(){
   `;
 }
 
-function buildGroupFilter(){
-  const sel=document.getElementById('gf'),pills=document.getElementById('group-pills'),rgList=document.getElementById('rg-list');
-  sel.innerHTML='<option value="">Todos os grupos</option>';
+function renderGroupPills(containerId, activeValue, onSelect){
+  const pills=document.getElementById(containerId);
+  if(!pills)return;
   pills.innerHTML='';
-  rgList.innerHTML='';
-  document.getElementById('rg').value='';
-  groups.forEach(g=>{
-    const o=document.createElement('option');
-    o.value=g;
-    o.textContent=g;
-    sel.appendChild(o);
-    const ro=document.createElement('option');
-    ro.value=g;
-    ro.textContent=g;
-    rgList.appendChild(ro);
-    const c=gc(g);
+
+  const addBtn=(label,value,color,selected)=>{
     const btn=document.createElement('button');
-    btn.style.cssText=`background:${c}1a;color:${c};border:1.5px solid ${c};font-size:.68rem;font-weight:800;border-radius:2rem;padding:.15rem .65rem;cursor:pointer;transition:all .15s`;
-    btn.textContent=g;
-    btn.onclick=()=>{document.getElementById('gf').value=g;os();};
+    btn.type='button';
+    btn.className='group-pill';
+    btn.classList.toggle('active',selected);
+    btn.style.cssText=selected
+      ? `background:${color};color:#fff;border:1.5px solid ${color};`
+      : `background:${color}1a;color:${color};border:1.5px solid ${color};`;
+    btn.textContent=label;
+    btn.onclick=()=>onSelect(value);
     pills.appendChild(btn);
+  };
+
+  addBtn('Todos os grupos','', '#16a34a', !activeValue);
+  groups.forEach(g=>{
+    const c=gc(g);
+    addBtn(g,g,c,activeValue===g);
   });
+}
+
+function buildGroupPills(){
+  renderGroupPills('group-pills', exploreGroupFilter, setExploreGroupFilter);
+  renderGroupPills('group-pills-rg', rankGroupFilter, setRankGroupFilter);
+}
+
+function setExploreGroupFilter(value){
+  exploreGroupFilter=value;
+  renderGroupPills('group-pills', exploreGroupFilter, setExploreGroupFilter);
+  os();
+}
+
+function setRankGroupFilter(value){
+  rankGroupFilter=value;
+  renderGroupPills('group-pills-rg', rankGroupFilter, setRankGroupFilter);
+  if(document.getElementById('rn').value&&document.getElementById('rnk-tbl').innerHTML.trim())doRank();
 }
 
 function buildCmpSelects(){
@@ -636,7 +652,7 @@ let fltData=[],curPage=0;
 const PS=24;
 
 function os(){
-  const q=n(document.getElementById('si').value),g=document.getElementById('gf').value,so=document.getElementById('ss').value;
+  const q=n(document.getElementById('si').value),g=exploreGroupFilter,so=document.getElementById('ss').value;
   fltData=AD.filter((r,idx)=>{
     const searchText=foodSearchByIndex.get(idx)||n(r[cols.name]||'');
     const nm=!q||searchText.includes(q);
@@ -654,7 +670,13 @@ function os(){
   curPage=0;renderCards();if(document.getElementById('vt').checked)renderTable();
 }
 
-function cf(){document.getElementById('si').value='';document.getElementById('gf').value='';document.getElementById('ss').value='';os();}
+function cf(){
+  document.getElementById('si').value='';
+  document.getElementById('ss').value='';
+  exploreGroupFilter='';
+  renderGroupPills('group-pills', exploreGroupFilter, setExploreGroupFilter);
+  os();
+}
 
 function renderCards(){
   const cont=document.getElementById('cards-view');
@@ -841,14 +863,7 @@ function ucb(){
 // RANKING
 // ==========================================
 function getSelectedGroupFilter(){
-  const raw=String(document.getElementById('rg').value||'').trim();
-  if(!raw)return '';
-  const grp=resolveGroupValue(raw);
-  if(grp===null){
-    alert('Selecione um grupo válido.');
-    return null;
-  }
-  return grp;
+  return rankGroupFilter;
 }
 
 function doRank(){
@@ -856,11 +871,9 @@ function doRank(){
   const top=+document.getElementById('rt').value,ord=document.getElementById('ro').value;
   if(!col)return;
   const grpValue=getSelectedGroupFilter();
-  if(grpValue===null)return;
   let d=AD.filter(r=>pN(r[col])!==null&&(!grpValue||r[cols.group]===grpValue));
   d.sort((a,b)=>ord==='desc'?(pN(b[col])||0)-(pN(a[col])||0):(pN(a[col])||0)-(pN(b[col])||0));
   d=d.slice(0,top);
-  const gcs=d.map(r=>gc(r[cols.group]||''));
   const medals=['🥇','🥈','🥉'];
   document.getElementById('rnk-tbl').innerHTML=`<thead class="table-light"><tr><th>#</th><th>Alimento</th>${cols.group?'<th>Grupo</th>':''}<th>${displayColName(col)}</th></tr></thead>
   <tbody>${d.map((r,i)=>{
